@@ -179,6 +179,43 @@ def admin_add_teacher(
     )
 
 
+@app.put("/api/admin/teachers/{username}/classes", response_model=schemas.TeacherResponse)
+def admin_update_teacher_classes(
+    username: str,
+    payload: schemas.TeacherUpdateClassesRequest,
+    db: Session = Depends(get_db),
+    _=Depends(auth.require_role("admin")),
+):
+    teacher = db.query(models.Teacher).filter_by(username=username).first()
+    if not teacher:
+        raise HTTPException(status_code=404, detail="Teacher not found.")
+    classes = (
+        db.query(models.SchoolClass)
+        .filter(models.SchoolClass.name.in_(payload.classes))
+        .all()
+    )
+    teacher.classes = classes
+    db.commit()
+    return schemas.TeacherResponse(
+        name=teacher.name, username=teacher.username, classes=[c.name for c in classes]
+    )
+
+
+@app.put("/api/admin/teachers/{username}/password")
+def admin_reset_teacher_password(
+    username: str,
+    payload: schemas.TeacherPasswordResetRequest,
+    db: Session = Depends(get_db),
+    _=Depends(auth.require_role("admin")),
+):
+    teacher = db.query(models.Teacher).filter_by(username=username).first()
+    if not teacher:
+        raise HTTPException(status_code=404, detail="Teacher not found.")
+    teacher.password_hash = auth.hash_password(payload.new_password)
+    db.commit()
+    return {"detail": "Password reset for " + teacher.name + "."}
+
+
 @app.get("/api/admin/students", response_model=list[schemas.StudentSummaryResponse])
 def admin_list_students(
     db: Session = Depends(get_db), _=Depends(auth.require_role("admin"))

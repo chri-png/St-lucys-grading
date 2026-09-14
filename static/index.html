@@ -42,6 +42,15 @@
   .term-block { border: 1px solid var(--border); border-radius: 6px; padding: 0.9rem 1rem; margin-top: 1rem; }
   .term-block h3 { margin-top: 0; }
   .muted { color: #555; font-size: 0.95rem; }
+  .password-field { position: relative; }
+  .password-field input { padding-right: 3.2rem; }
+  .password-toggle {
+    position: absolute; right: 0.4rem; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: var(--accent); font-family: inherit;
+    font-size: 0.85rem; padding: 0.35rem 0.5rem; cursor: pointer; border-radius: 4px;
+  }
+  .password-toggle:hover { background: var(--accent-light); }
+  .teacher-edit-classes { border: 1px solid var(--border); border-radius: 6px; padding: 0.8rem; margin-top: 0.5rem; }
 </style>
 </head>
 <body>
@@ -86,6 +95,29 @@
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
   }
+  function passwordFieldHtml(id, labelText) {
+    return `
+      <label for="${id}">${labelText}</label>
+      <div class="password-field">
+        <input type="password" id="${id}" autocomplete="off">
+        <button type="button" class="password-toggle" data-toggle-for="${id}" aria-pressed="false">Show</button>
+      </div>`;
+  }
+
+  function wirePasswordToggles(container) {
+    container.querySelectorAll(".password-toggle").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const input = document.getElementById(btn.dataset.toggleFor);
+        if (!input) return;
+        const showing = input.type === "text";
+        input.type = showing ? "password" : "text";
+        btn.textContent = showing ? "Show" : "Hide";
+        btn.setAttribute("aria-pressed", showing ? "false" : "true");
+        btn.setAttribute("aria-label", (showing ? "Show" : "Hide") + " password");
+      });
+    });
+  }
+
   function average(scores) { return scores.length ? scores.reduce((a,b)=>a+b,0)/scores.length : 0; }
   function letterGrade(score) {
     if (score >= 90) return "A"; if (score >= 80) return "B";
@@ -157,11 +189,11 @@
       area.innerHTML = `
         <fieldset>
           <legend>Administrator login</legend>
-          <label for="admin-password">Administrator password</label>
-          <input type="password" id="admin-password" autocomplete="off">
+          ${passwordFieldHtml("admin-password", "Administrator password")}
           <p class="muted">Default password is admin123 the first time the system is used. Change it after logging in.</p>
           <div class="actions"><button type="button" class="primary" id="btn-admin-login">Log in</button></div>
         </fieldset>`;
+      wirePasswordToggles(area);
       document.getElementById("btn-admin-login").addEventListener("click", async () => {
         try {
           const pw = document.getElementById("admin-password").value;
@@ -178,10 +210,10 @@
           <legend>Teacher login</legend>
           <label for="teacher-username">Username</label>
           <input type="text" id="teacher-username" autocomplete="off">
-          <label for="teacher-password">Password</label>
-          <input type="password" id="teacher-password" autocomplete="off">
+          ${passwordFieldHtml("teacher-password", "Password")}
           <div class="actions"><button type="button" class="primary" id="btn-teacher-login">Log in</button></div>
         </fieldset>`;
+      wirePasswordToggles(area);
       document.getElementById("btn-teacher-login").addEventListener("click", async () => {
         try {
           const username = document.getElementById("teacher-username").value.trim();
@@ -271,14 +303,41 @@
         <input type="text" id="teacher-name">
         <label for="new-teacher-username">Username</label>
         <input type="text" id="new-teacher-username" autocomplete="off">
-        <label for="new-teacher-password">Password</label>
-        <input type="password" id="new-teacher-password" autocomplete="off">
+        ${passwordFieldHtml("new-teacher-password", "Password")}
         <label>Classes this teacher can access</label>
         ${classCheckboxes || "<p class='muted'>No classes available yet.</p>"}
         <div class="actions"><button type="button" class="primary" id="btn-add-teacher">Add teacher</button></div>
         ${teacherRows ? `<table><caption>Current teachers</caption>
           <tr><th scope="col">Name</th><th scope="col">Username</th><th scope="col">Assigned classes</th></tr>${teacherRows}</table>`
           : "<p class='muted'>No teachers added yet.</p>"}
+      </fieldset>
+
+      <fieldset>
+        <legend>Reassign a teacher's classes</legend>
+        <p class="muted">Forgot to give a teacher access to a class, or need to change it later? Pick the teacher below and update their classes.</p>
+        <label for="reassign-teacher-select">Teacher</label>
+        <select id="reassign-teacher-select">
+          <option value="">Select a teacher</option>
+          ${teachers.map((t) => `<option value="${escapeHtml(t.username)}">${escapeHtml(t.name)} (${escapeHtml(t.username)})</option>`).join("")}
+        </select>
+        <div id="reassign-class-checkboxes">${
+          classes.length
+            ? classes.map((c) => `<label class="inline"><input type="checkbox" value="${escapeHtml(c.name)}" class="reassign-class-cb"> ${escapeHtml(c.name)}</label>`).join("")
+            : "<p class='muted'>No classes available yet.</p>"
+        }</div>
+        <div class="actions"><button type="button" class="primary" id="btn-reassign-classes">Update classes</button></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Reset a teacher's password</legend>
+        <p class="muted">If a teacher forgets their password, set a new one here and tell them what it is. For security, existing passwords can't be viewed or recovered — only reset.</p>
+        <label for="reset-pw-teacher-select">Teacher</label>
+        <select id="reset-pw-teacher-select">
+          <option value="">Select a teacher</option>
+          ${teachers.map((t) => `<option value="${escapeHtml(t.username)}">${escapeHtml(t.name)} (${escapeHtml(t.username)})</option>`).join("")}
+        </select>
+        ${passwordFieldHtml("reset-pw-new-password", "New password")}
+        <div class="actions"><button type="button" class="primary" id="btn-reset-teacher-password">Set new password</button></div>
       </fieldset>
 
       <fieldset>
@@ -305,11 +364,48 @@
 
       <fieldset>
         <legend>Administrator settings</legend>
-        <label for="admin-new-password">Change administrator password</label>
-        <input type="password" id="admin-new-password" autocomplete="off">
+        ${passwordFieldHtml("admin-new-password", "Change administrator password")}
         <div class="actions"><button type="button" class="secondary" id="btn-change-admin-password">Update password</button></div>
       </fieldset>
     `;
+    wirePasswordToggles(appEl);
+
+    const reassignSelect = document.getElementById("reassign-teacher-select");
+    reassignSelect.addEventListener("change", () => {
+      const username = reassignSelect.value;
+      const teacher = teachers.find((t) => t.username === username);
+      const currentClasses = teacher ? teacher.classes : [];
+      appEl.querySelectorAll(".reassign-class-cb").forEach((cb) => {
+        cb.checked = currentClasses.includes(cb.value);
+      });
+    });
+
+    document.getElementById("btn-reassign-classes").addEventListener("click", async () => {
+      const username = reassignSelect.value;
+      if (!username) { announce("Please choose a teacher first.", true); return; }
+      const selected = Array.from(appEl.querySelectorAll(".reassign-class-cb:checked")).map((cb) => cb.value);
+      try {
+        await api("/admin/teachers/" + encodeURIComponent(username) + "/classes", {
+          method: "PUT", body: JSON.stringify({ classes: selected })
+        });
+        announce("Updated classes for that teacher.", false);
+        render();
+      } catch (e) { announce(e.message, true); }
+    });
+
+    document.getElementById("btn-reset-teacher-password").addEventListener("click", async () => {
+      const username = document.getElementById("reset-pw-teacher-select").value;
+      const newPassword = document.getElementById("reset-pw-new-password").value;
+      if (!username) { announce("Please choose a teacher first.", true); return; }
+      if (!newPassword) { announce("Please enter a new password.", true); return; }
+      try {
+        await api("/admin/teachers/" + encodeURIComponent(username) + "/password", {
+          method: "PUT", body: JSON.stringify({ new_password: newPassword })
+        });
+        announce("Password reset. Let the teacher know their new password.", false);
+        document.getElementById("reset-pw-new-password").value = "";
+      } catch (e) { announce(e.message, true); }
+    });
 
     document.getElementById("btn-add-class").addEventListener("click", async () => {
       const name = document.getElementById("new-class-name").value.trim();

@@ -41,6 +41,14 @@ class TeacherCreateRequest(BaseModel):
     classes: List[str] = []
 
 
+class TeacherUpdateClassesRequest(BaseModel):
+    classes: List[str] = []
+
+
+class TeacherPasswordResetRequest(BaseModel):
+    new_password: str = Field(min_length=4)
+
+
 class TeacherResponse(BaseModel):
     name: str
     username: str
