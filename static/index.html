@@ -4,1197 +4,1704 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>St. Lucy's School for the Blind — Grading System</title>
+
 <style>
   :root {
-    --ink: #1a1a1a; --paper: #fdfcf9; --accent: #1d4d3f;
-    --accent-light: #e8f0ec; --border: #b8b2a4; --error: #7a2e2e; --error-bg: #fbeaea;
-    --sidebar-width: 260px;
+    --ink: #1A1A1A;
+    --paper: #F5F5F5;
+    --surface: #FFFFFF;
+    --accent: #005A9C;
+    --accent-light: #E6F0F7;
+    --border: #666666;
+    --muted: #444444;
+    --error: #B00020;
+    --error-bg: #FDECEC;
+    --focus: #FFB000;
   }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; }
-  body { background: var(--paper); color: var(--ink); font-family: Georgia, 'Times New Roman', serif; font-size: 17px; line-height: 1.5; }
-  h1, h2, h3 { font-family: Georgia, 'Times New Roman', serif; }
-  h2 { font-size: 1.3rem; border-bottom: 2px solid var(--accent-light); padding-bottom: 0.5rem; margin-top: 0; }
-  h3 { font-size: 1.1rem; margin-top: 1.5rem; }
-  fieldset { border: 1px solid var(--border); border-radius: 6px; padding: 1rem 1.1rem; margin: 0 0 1.25rem; }
-  legend { font-weight: bold; padding: 0 0.4rem; }
-  label { display: block; font-weight: bold; margin: 0.85rem 0 0.3rem; }
-  label.inline { display: inline-flex; align-items: center; gap: 0.4rem; font-weight: normal; margin: 0.4rem 0.8rem 0.4rem 0; }
-  input[type=text], input[type=number], input[type=password], select, textarea { width: 100%; font-family: inherit; font-size: 1rem; padding: 0.55rem; border: 1px solid var(--border); border-radius: 4px; }
-  textarea { min-height: 4.5rem; resize: vertical; }
-  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible { outline: 3px solid #0b5fff; outline-offset: 2px; }
-  button.primary { font-family: inherit; font-size: 1rem; padding: 0.65rem 1.2rem; background: var(--accent); color: var(--paper); border: none; border-radius: 4px; cursor: pointer; }
-  button.primary:disabled { opacity: 0.6; cursor: default; }
-  button.secondary { font-family: inherit; font-size: 1rem; padding: 0.65rem 1.2rem; background: var(--paper); color: var(--accent); border: 2px solid var(--accent); border-radius: 4px; cursor: pointer; }
-  button.danger { font-family: inherit; font-size: 0.85rem; padding: 0.35rem 0.7rem; background: var(--error-bg); color: var(--error); border: 1px solid var(--error); border-radius: 4px; cursor: pointer; }
-  button.small { font-size: 0.85rem; padding: 0.35rem 0.7rem; }
-  .actions { margin-top: 1rem; display: flex; gap: 0.6rem; flex-wrap: wrap; }
-  table { width: 100%; border-collapse: collapse; margin-top: 0.75rem; }
-  caption { text-align: left; font-weight: bold; margin-bottom: 0.4rem; }
-  th, td { text-align: left; padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--border); }
-  th { background: var(--accent-light); }
-  .role-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
-  .role-tabs button { font-family: inherit; font-size: 1rem; padding: 0.6rem 1.1rem; border: 2px solid var(--accent); background: var(--paper); color: var(--accent); border-radius: 4px; cursor: pointer; }
-  .role-tabs button[aria-pressed="true"] { background: var(--accent); color: var(--paper); }
-  .term-block { border: 1px solid var(--border); border-radius: 6px; padding: 0.9rem 1rem; margin-top: 1rem; }
-  .term-block h3 { margin-top: 0; }
-  .muted { color: #555; font-size: 0.95rem; }
-  .password-field { position: relative; }
-  .password-field input { padding-right: 3.2rem; }
-  .password-toggle { position: absolute; right: 0.4rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--accent); font-family: inherit; font-size: 0.85rem; padding: 0.35rem 0.5rem; cursor: pointer; border-radius: 4px; }
-  .password-toggle:hover { background: var(--accent-light); }
-  .result-row { border: 1px solid var(--border); border-radius: 6px; padding: 0.8rem; margin-top: 0.6rem; }
-  .result-row .actions { margin-top: 0.6rem; }
 
-  /* ---- Login screen ---- */
-  .login-screen { max-width: 640px; margin: 0 auto; padding: 1.5rem; }
-  .login-header { padding: 1.25rem 0 1.5rem; }
-  .login-header h1 { margin: 0; font-size: 1.5rem; color: var(--accent); font-weight: normal; }
-  .login-header p { margin: 0.3rem 0 0; color: #555; }
-  #login-message { margin-bottom: 1rem; padding: 0.75rem 1rem; border-radius: 4px; display: none; }
-
-  /* ---- App shell ---- */
-  #app-shell { display: flex; min-height: 100vh; }
-  .sidebar { width: var(--sidebar-width); flex-shrink: 0; background: #fff; border-right: 1px solid var(--border); display: flex; flex-direction: column; }
-  .sidebar-brand { padding: 1.25rem 1.1rem; border-bottom: 1px solid var(--border); }
-  .sidebar-brand strong { display: block; color: var(--accent); font-size: 1.05rem; }
-  .sidebar-brand span { font-size: 0.8rem; color: #666; }
-  #sidebar-nav { flex: 1; overflow-y: auto; padding: 0.6rem 0; }
-  .sidebar-footer { padding: 0.9rem 1.1rem; border-top: 1px solid var(--border); }
-  .sidebar-footer button { width: 100%; font-family: inherit; font-size: 0.95rem; padding: 0.6rem; background: var(--paper); color: var(--accent); border: 2px solid var(--accent); border-radius: 4px; cursor: pointer; }
-
-  .nav-top-btn, .nav-top-link {
-    width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
-    padding: 0.7rem 1.1rem; background: none; border: none; border-left: 3px solid transparent;
-    text-align: left; font-family: inherit; font-size: 0.97rem; color: var(--ink); cursor: pointer; text-decoration: none;
+  html[data-theme="dark"] {
+    --ink: #FFFFFF;
+    --paper: #121212;
+    --surface: #1E1E1E;
+    --accent: #4DA3FF;
+    --accent-light: #263A4D;
+    --border: #B0B0B0;
+    --muted: #E0E0E0;
+    --error: #FF6B6B;
+    --error-bg: #3A1F1F;
+    --focus: #FFD54F;
   }
-  .nav-top-btn:hover, .nav-top-link:hover { background: var(--accent-light); }
-  .nav-top-btn[aria-expanded="true"], .nav-top-link[aria-current="page"], .nav-top-btn.has-active-child {
-    border-left-color: var(--accent); background: var(--accent-light); font-weight: bold;
+
+  * {
+    box-sizing: border-box;
   }
-  .nav-chevron { display: inline-block; transition: transform 0.15s; font-size: 0.8rem; }
-  .nav-top-btn[aria-expanded="true"] .nav-chevron { transform: rotate(90deg); }
-  .nav-children { list-style: none; margin: 0; padding: 0; }
-  .nav-children a {
-    display: block; padding: 0.55rem 1.1rem 0.55rem 2.3rem; color: var(--ink); text-decoration: none;
-    font-size: 0.9rem; border-left: 3px solid transparent;
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 19px;
+    line-height: 1.5;
   }
-  .nav-children a:hover { background: var(--accent-light); }
-  .nav-children a[aria-current="page"] { border-left-color: var(--accent); font-weight: bold; background: var(--accent-light); }
 
-  .main-column { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-  .topbar { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 0.5rem; }
-  #breadcrumb { font-size: 0.92rem; color: #555; }
-  #breadcrumb a { color: var(--accent); text-decoration: none; }
-  #breadcrumb a:hover { text-decoration: underline; }
-  #breadcrumb .crumb-current { color: var(--ink); font-weight: bold; }
-  #breadcrumb .crumb-sep { margin: 0 0.4rem; color: #999; }
-  #topbar-user { font-size: 0.9rem; color: #555; }
+  header {
+    background: var(--accent);
+    color: #FFFFFF;
+    padding: 1.5rem 1.25rem;
+  }
 
-  #message { margin: 1rem 1.5rem 0; padding: 0.75rem 1rem; border-radius: 4px; display: none; }
-  #message.show, #login-message.show { display: block; }
-  #message.success, #login-message.success { background: var(--accent-light); border: 1px solid var(--accent); }
-  #message.error, #login-message.error { background: var(--error-bg); border: 1px solid var(--error); color: var(--error); }
+  header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: normal;
+    letter-spacing: 0.01em;
+  }
 
-  #page-content { padding: 1.25rem 1.5rem 2.5rem; max-width: 900px; }
-  #page-content:focus { outline: none; }
+  header p {
+    margin: 0.35rem 0 0;
+    font-size: 1rem;
+    opacity: 0.92;
+  }
 
-  .stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; margin: 1rem 0 1.75rem; }
-  .stat-card { border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.1rem; background: #fff; }
-  .stat-card .stat-value { font-size: 1.7rem; font-weight: bold; color: var(--accent); }
-  .stat-card .stat-label { font-size: 0.85rem; color: #555; margin-top: 0.2rem; }
+  main {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1.25rem;
+  }
 
-  .mobile-menu-toggle { display: none; }
-  .sidebar-overlay { display: none; }
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
 
-  @media (max-width: 900px) {
-    .sidebar {
-      position: fixed; top: 0; left: 0; height: 100vh; z-index: 40; overflow-y: auto;
-      transform: translateX(-100%); transition: transform 0.2s; box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+  nav button {
+    font-family: inherit;
+    font-size: 1rem;
+    padding: 0.6rem 1rem;
+    border: 2px solid var(--accent);
+    background: var(--paper);
+    color: var(--accent);
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  nav button[aria-pressed="true"] {
+    background: var(--accent);
+    color: #FFFFFF;
+    font-weight: bold;
+  }
+
+  nav button:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  section[data-panel] {
+    display: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.25rem;
+    background: var(--surface);
+  }
+
+  section[data-panel].active {
+    display: block;
+  }
+
+  h2 {
+    margin-top: 0;
+    font-size: 1.25rem;
+    border-bottom: 2px solid var(--accent-light);
+    padding-bottom: 0.5rem;
+  }
+
+  label {
+    display: block;
+    font-weight: bold;
+    margin: 1rem 0 0.3rem;
+  }
+
+  input,
+  select {
+    width: 100%;
+    font-family: inherit;
+    font-size: 1rem;
+    padding: 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--surface);
+    color: var(--ink);
+  }
+
+  .actions {
+    margin-top: 1.25rem;
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  button.primary {
+    font-family: inherit;
+    font-size: 1rem;
+    padding: 0.65rem 1.2rem;
+    background: var(--accent);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  button.secondary {
+    font-family: inherit;
+    font-size: 1rem;
+    padding: 0.65rem 1.2rem;
+    background: var(--paper);
+    color: var(--accent);
+    border: 2px solid var(--accent);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  #message {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    display: none;
+  }
+
+  #message.show {
+    display: block;
+  }
+
+  #message.success {
+    background: var(--accent-light);
+    border: 1px solid var(--accent);
+  }
+
+  #message.error {
+    background: var(--error-bg);
+    border: 1px solid var(--error);
+    color: var(--error);
+  }
+
+  .record {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.9rem 1rem;
+    margin-top: 0.9rem;
+  }
+
+  .record h3 {
+    margin: 0 0 0.4rem;
+    font-size: 1.05rem;
+  }
+
+  .record p {
+    margin: 0.2rem 0;
+  }
+
+  footer {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 1.25rem 2rem;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 1.5rem 0;
+  }
+
+  /* HEADER AND THEME BUTTON */
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .header-title {
+    min-width: 0;
+  }
+
+  .theme-control {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .theme-button {
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 0.65rem 0.9rem;
+    min-width: 8rem;
+    background: #FFFFFF;
+    color: #005A9C;
+    border: 2px solid #FFFFFF;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .theme-button:hover {
+    background: #E6F0F7;
+  }
+
+  .theme-button:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 3px;
+  }
+
+  .theme-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.4rem);
+    min-width: 10rem;
+    background: var(--surface);
+    color: var(--ink);
+    border: 2px solid var(--border);
+    border-radius: 5px;
+    padding: 0.35rem;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  }
+
+  .theme-menu[hidden] {
+    display: none;
+  }
+
+  .theme-option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 0.65rem 0.75rem;
+    background: var(--surface);
+    color: var(--ink);
+    border: 0;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .theme-option:hover,
+  .theme-option[aria-checked="true"] {
+    background: var(--accent-light);
+  }
+
+  @media (max-width: 600px) {
+    .header-inner {
+      align-items: flex-start;
     }
-    .sidebar.open { transform: translateX(0); }
-    .mobile-menu-toggle {
-      display: flex; align-items: center; gap: 0.4rem; margin: 0.9rem 1.5rem 0; padding: 0.55rem 1rem;
-      background: var(--accent); color: var(--paper); border: none; border-radius: 4px; font-family: inherit; font-size: 0.95rem; cursor: pointer;
+
+    .theme-button {
+      min-width: auto;
     }
-    .sidebar-overlay.open { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 30; }
-    .main-column { width: 100%; }
-    #page-content { padding: 1rem; }
   }
 </style>
 </head>
+
 <body>
 
-<div id="login-screen" class="login-screen">
-  <div class="login-header">
-    <h1>St. Lucy's School for the Blind</h1>
-    <p>Student Grading System</p>
-  </div>
-  <div id="login-message" role="status" aria-live="polite"></div>
-  <div id="login-content"></div>
-</div>
+<header>
+  <div class="header-inner">
 
-<div id="app-shell" hidden>
-  <button type="button" id="mobile-menu-toggle" class="mobile-menu-toggle" aria-expanded="false" aria-controls="sidebar">
-    <span aria-hidden="true">&#9776;</span> Menu
-  </button>
-  <div id="sidebar-overlay" class="sidebar-overlay"></div>
-  <aside id="sidebar" class="sidebar" aria-label="Main navigation">
-    <div class="sidebar-brand">
-      <strong>St. Lucy's</strong>
-      <span>School for the Blind</span>
+    <div class="header-title">
+      <h1>St. Lucy's School for the Blind</h1>
+      <p>Student Grading System</p>
     </div>
-    <nav id="sidebar-nav" aria-label="Sections"></nav>
-    <div class="sidebar-footer">
-      <button type="button" id="btn-logout">Exit / Log out</button>
+
+    <div class="theme-control">
+
+      <button
+        type="button"
+        class="theme-button"
+        id="theme-button"
+        aria-haspopup="true"
+        aria-expanded="false">
+        ☀️ / 🌙 Theme
+      </button>
+
+      <div
+        class="theme-menu"
+        id="theme-menu"
+        role="menu"
+        hidden>
+
+        <button
+          type="button"
+          class="theme-option"
+          role="menuitemradio"
+          aria-checked="true"
+          data-theme-choice="light">
+          ☀️ Light mode
+        </button>
+
+        <button
+          type="button"
+          class="theme-option"
+          role="menuitemradio"
+          aria-checked="false"
+          data-theme-choice="dark">
+          🌙 Dark mode
+        </button>
+
+      </div>
     </div>
-  </aside>
-  <div class="main-column">
-    <header class="topbar">
-      <nav aria-label="Breadcrumb" id="breadcrumb"></nav>
-      <div id="topbar-user"></div>
-    </header>
-    <div id="message" role="status" aria-live="polite"></div>
-    <main id="page-content" tabindex="-1"></main>
+
   </div>
-</div>
+</header>
+
+<main>
+
+  <nav aria-label="Sections">
+
+    <button
+      type="button"
+      data-target="panel-add-student"
+      aria-pressed="true">
+      Add student
+    </button>
+
+    <button
+      type="button"
+      data-target="panel-add-grade"
+      aria-pressed="false">
+      Add grade
+    </button>
+
+    <button
+      type="button"
+      data-target="panel-report"
+      aria-pressed="false">
+      Report card
+    </button>
+
+    <button
+      type="button"
+      data-target="panel-list"
+      aria-pressed="false">
+      All students
+    </button>
+
+    <button
+      type="button"
+      data-target="panel-summary"
+      aria-pressed="false">
+      Class summary
+    </button>
+
+    <button
+      type="button"
+      data-target="panel-data"
+      aria-pressed="false">
+      Save / load data
+    </button>
+
+  </nav>
+
+  <div
+    id="message"
+    role="status"
+    aria-live="polite">
+  </div>
+
+
+  <!-- ADD STUDENT -->
+
+  <section
+    data-panel
+    id="panel-add-student"
+    class="active"
+    aria-labelledby="h-add-student">
+
+    <h2 id="h-add-student">
+      Add a new student
+    </h2>
+
+    <label for="new-student-name">
+      Student's full name
+    </label>
+
+    <input
+      type="text"
+      id="new-student-name"
+      autocomplete="off">
+
+    <div class="actions">
+
+      <button
+        type="button"
+        class="primary"
+        id="btn-add-student">
+        Add student
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- ADD GRADE -->
+
+  <section
+    data-panel
+    id="panel-add-grade"
+    aria-labelledby="h-add-grade">
+
+    <h2 id="h-add-grade">
+      Add a grade
+    </h2>
+
+    <label for="grade-student-select">
+      Student
+    </label>
+
+    <select id="grade-student-select"></select>
+
+    <label for="grade-subject">
+      Subject
+    </label>
+
+    <input
+      type="text"
+      id="grade-subject"
+      autocomplete="off">
+
+    <label for="grade-score">
+      Score (0 to 100)
+    </label>
+
+    <input
+      type="number"
+      id="grade-score"
+      min="0"
+      max="100"
+      step="1">
+
+    <div class="actions">
+
+      <button
+        type="button"
+        class="primary"
+        id="btn-add-grade">
+        Record grade
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- REPORT CARD -->
+
+  <section
+    data-panel
+    id="panel-report"
+    aria-labelledby="h-report">
+
+    <h2 id="h-report">
+      One student's report card
+    </h2>
+
+    <label for="report-student-select">
+      Student
+    </label>
+
+    <select id="report-student-select"></select>
+
+    <div class="actions">
+
+      <button
+        type="button"
+        class="primary"
+        id="btn-show-report">
+        Show report card
+      </button>
+
+    </div>
+
+    <div id="report-output"></div>
+
+  </section>
+
+
+  <!-- ALL STUDENTS -->
+
+  <section
+    data-panel
+    id="panel-list"
+    aria-labelledby="h-list">
+
+    <h2 id="h-list">
+      All enrolled students
+    </h2>
+
+    <div id="list-output"></div>
+
+  </section>
+
+
+  <!-- CLASS SUMMARY -->
+
+  <section
+    data-panel
+    id="panel-summary"
+    aria-labelledby="h-summary">
+
+    <h2 id="h-summary">
+      Class summary
+    </h2>
+
+    <div id="summary-output"></div>
+
+  </section>
+
+
+  <!-- SAVE AND LOAD -->
+
+  <section
+    data-panel
+    id="panel-data"
+    aria-labelledby="h-data">
+
+    <h2 id="h-data">
+      Save or load your data
+    </h2>
+
+    <p>
+      This program keeps all student records in this browser tab only.
+      Closing the tab will lose your data unless you save it first.
+      Download a save file when you're done working, and load it again
+      next time you open this page.
+    </p>
+
+    <div class="actions">
+
+      <button
+        type="button"
+        class="secondary"
+        id="btn-export">
+        Download save file
+      </button>
+
+      <label
+        for="import-file"
+        class="secondary"
+        style="display:inline-block; padding:0.65rem 1.2rem; border:2px solid var(--accent); border-radius:4px; cursor:pointer; margin:0;">
+        Load save file
+      </label>
+
+      <input
+        type="file"
+        id="import-file"
+        accept="application/json"
+        style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<footer>
+  <p>
+    Works fully offline once this page has loaded.
+    Save your data file regularly.
+  </p>
+</footer>
+
 
 <script>
+
 (function () {
+
   "use strict";
 
-  const API_BASE = "/api";
+  /*
+    IN-MEMORY DATA
+    Structure:
+    {
+      "Student Name": {
+        "Mathematics": [80, 90],
+        "English": [70, 75]
+      }
+    }
+  */
 
-  let session = null; // { token, role, displayName }
-  let loginRole = "admin";
-  let expandedNavIds = new Set();
+  let data = {};
 
-  const loginScreenEl = document.getElementById("login-screen");
-  const loginContentEl = document.getElementById("login-content");
-  const loginMessageEl = document.getElementById("login-message");
-  const appShellEl = document.getElementById("app-shell");
-  const sidebarEl = document.getElementById("sidebar");
-  const sidebarNavEl = document.getElementById("sidebar-nav");
-  const sidebarOverlayEl = document.getElementById("sidebar-overlay");
-  const mobileToggleEl = document.getElementById("mobile-menu-toggle");
-  const breadcrumbEl = document.getElementById("breadcrumb");
-  const topbarUserEl = document.getElementById("topbar-user");
-  const messageEl = document.getElementById("message");
-  const pageEl = document.getElementById("page-content");
+  const messageEl =
+    document.getElementById("message");
+
+
+  /* -------------------------
+     MESSAGES
+  ------------------------- */
 
   function announce(text, isError) {
-    const target = session ? messageEl : loginMessageEl;
-    target.textContent = text;
-    target.className = "show " + (isError ? "error" : "success");
+
+    messageEl.textContent = text;
+
+    messageEl.className =
+      "show " +
+      (isError ? "error" : "success");
+
   }
+
+
   function clearMessage() {
-    messageEl.className = ""; messageEl.textContent = "";
-    loginMessageEl.className = ""; loginMessageEl.textContent = "";
-  }
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
-  }
-  function average(nums) { return nums.length ? nums.reduce((a,b)=>a+b,0)/nums.length : 0; }
 
-  // ---- CBE-style grading ----
-  function cbeFull(score) {
-    if (score >= 76) return "Exceeding Expectation (EE)";
-    if (score >= 51) return "Meeting Expectation (ME)";
-    if (score >= 26) return "Approaching Expectation (AE)";
-    return "Below Expectation (BE)";
+    messageEl.className = "";
+
+    messageEl.textContent = "";
+
   }
-  const CBE_LEVELS = [
-    { code: "EE", score: 88, label: "Exceeding Expectation (EE) — 76 to 100" },
-    { code: "ME", score: 63, label: "Meeting Expectation (ME) — 51 to 75" },
-    { code: "AE", score: 38, label: "Approaching Expectation (AE) — 26 to 50" },
-    { code: "BE", score: 12, label: "Below Expectation (BE) — 0 to 25" },
-  ];
-  function cbeLevelOptionsHtml(selectedCode) {
-    return CBE_LEVELS.map((l) =>
-      `<option value="${l.code}" ${l.code === selectedCode ? "selected" : ""}>${escapeHtml(l.label)}</option>`
-    ).join("");
-  }
-  function scoreForLevel(code) {
-    const level = CBE_LEVELS.find((l) => l.code === code);
-    return level ? level.score : 0;
-  }
-  function levelForScore(score) {
-    const match = CBE_LEVELS.find((l) => l.score === score);
-    return match ? match.code : null;
-  }
-  function scoreEntryFieldsHtml(idPrefix, defaultMode) {
-    return `
-      <label>How would you like to enter this?</label>
-      <label class="inline"><input type="radio" name="${idPrefix}-mode" value="level" ${defaultMode === "level" ? "checked" : ""}> Choose a rubric level</label>
-      <label class="inline"><input type="radio" name="${idPrefix}-mode" value="number" ${defaultMode === "number" ? "checked" : ""}> Enter a numeric score</label>
-      <div id="${idPrefix}-level-wrap" style="${defaultMode === "level" ? "" : "display:none;"}">
-        <label for="${idPrefix}-level">Rubric level</label>
-        <select id="${idPrefix}-level">${cbeLevelOptionsHtml("EE")}</select>
-      </div>
-      <div id="${idPrefix}-score-wrap" style="${defaultMode === "number" ? "" : "display:none;"}">
-        <label for="${idPrefix}-score">Score (0 to 100)</label>
-        <input type="number" id="${idPrefix}-score" min="0" max="100" step="1">
-      </div>`;
-  }
-  function wireScoreEntryToggle(container, idPrefix) {
-    container.querySelectorAll(`input[name="${idPrefix}-mode"]`).forEach((radio) => {
-      radio.addEventListener("change", () => {
-        if (!radio.checked) return;
-        document.getElementById(idPrefix + "-level-wrap").style.display = radio.value === "level" ? "" : "none";
-        document.getElementById(idPrefix + "-score-wrap").style.display = radio.value === "number" ? "" : "none";
-      });
-    });
-  }
-  function readScoreEntry(container, idPrefix) {
-    const mode = container.querySelector(`input[name="${idPrefix}-mode"]:checked`).value;
-    if (mode === "level") {
-      const code = document.getElementById(idPrefix + "-level").value;
-      return { score: scoreForLevel(code), valid: true };
+
+
+  /* -------------------------
+     CALCULATIONS
+  ------------------------- */
+
+  function average(scores) {
+
+    if (!scores.length) {
+      return 0;
     }
-    const raw = document.getElementById(idPrefix + "-score").value;
-    const score = Number(raw);
-    const valid = raw !== "" && !isNaN(score) && score >= 0 && score <= 100;
-    return { score, valid };
+
+    return scores.reduce(
+      (a, b) => a + b,
+      0
+    ) / scores.length;
+
   }
 
-  // ---- Password show/hide ----
-  function passwordFieldHtml(id, labelText) {
-    return `
-      <label for="${id}">${labelText}</label>
-      <div class="password-field">
-        <input type="password" id="${id}" autocomplete="off">
-        <button type="button" class="password-toggle" data-toggle-for="${id}" aria-pressed="false">Show</button>
-      </div>`;
-  }
-  function wirePasswordToggles(container) {
-    container.querySelectorAll(".password-toggle").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const input = document.getElementById(btn.dataset.toggleFor);
-        if (!input) return;
-        const showing = input.type === "text";
-        input.type = showing ? "password" : "text";
-        btn.textContent = showing ? "Show" : "Hide";
-        btn.setAttribute("aria-pressed", showing ? "false" : "true");
-      });
-    });
+
+  function letterGrade(score) {
+
+    if (score >= 90) return "A";
+
+    if (score >= 80) return "B";
+
+    if (score >= 70) return "C";
+
+    if (score >= 60) return "D";
+
+    return "F";
+
   }
 
-  async function withLoadingButton(button, loadingText, fn) {
-    const original = button.textContent;
-    button.disabled = true;
-    button.textContent = loadingText;
-    try { await fn(); } finally { button.disabled = false; button.textContent = original; }
-  }
 
-  async function api(path, options = {}) {
-    const headers = Object.assign({ "Content-Type": "application/json" }, options.headers || {});
-    if (session && session.token) headers["Authorization"] = "Bearer " + session.token;
-    const res = await fetch(API_BASE + path, Object.assign({}, options, { headers }));
-    let body = null;
-    try { body = await res.json(); } catch (e) { /* no body */ }
-    if (!res.ok) {
-      const detail = (body && body.detail) ? body.detail : "Something went wrong. Please try again.";
-      if (res.status === 401 && session) { session = null; renderAll(); }
-      throw new Error(detail);
-    }
-    return body;
-  }
+  /* -------------------------
+     NAVIGATION
+  ------------------------- */
 
-  async function downloadReportCard(path, filename, triggerBtn) {
-    const original = triggerBtn ? triggerBtn.textContent : null;
-    if (triggerBtn) { triggerBtn.disabled = true; triggerBtn.textContent = "Preparing PDF…"; }
-    try {
-      const headers = {};
-      if (session && session.token) headers["Authorization"] = "Bearer " + session.token;
-      const res = await fetch(API_BASE + path, { headers });
-      if (!res.ok) {
-        let detail = "Could not generate the report card.";
-        try { const body = await res.json(); if (body.detail) detail = body.detail; } catch (e) { /* ignore */ }
-        throw new Error(detail);
-      }
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url; a.download = filename;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (e) { announce(e.message, true); }
-    finally { if (triggerBtn) { triggerBtn.disabled = false; triggerBtn.textContent = original; } }
-  }
+  const navButtons =
+    document.querySelectorAll("nav button");
 
-  function aggregateByTermSubject(results) {
-    const termMap = {}; const termOrder = [];
-    results.forEach((r) => {
-      if (!termMap[r.term]) { termMap[r.term] = { subjects: {}, subjectOrder: [] }; termOrder.push(r.term); }
-      const t = termMap[r.term];
-      if (!t.subjects[r.subject]) { t.subjects[r.subject] = { total: 0, components: [] }; t.subjectOrder.push(r.subject); }
-      t.subjects[r.subject].total += r.score;
-      t.subjects[r.subject].components.push(r);
-    });
-    return { termMap, termOrder };
-  }
+  const panels =
+    document.querySelectorAll(
+      "section[data-panel]"
+    );
 
-  function renderResultHistoryHtml(student) {
-    if (!student.results.length) {
-      return "<p class='muted'>No results have been recorded for " + escapeHtml(student.name) + " yet.</p>";
-    }
-    const { termMap, termOrder } = aggregateByTermSubject(student.results);
-    const allSubjectTotals = [];
-    let html = `<h3>Full result history for ${escapeHtml(student.name)}</h3>`;
-    termOrder.forEach((term) => {
-      const t = termMap[term];
-      const subjectTotals = [];
-      let subjectBlocks = "";
-      t.subjectOrder.forEach((subject) => {
-        const s = t.subjects[subject];
-        subjectTotals.push(s.total); allSubjectTotals.push(s.total);
-        const componentLines = s.components.length > 1
-          ? "<ul>" + s.components.map((c) => `<li>${c.comment ? escapeHtml(c.comment) : "Entry"}: ${c.score}%</li>`).join("") + "</ul>"
-          : (s.components[0].comment ? `<p class="muted">${escapeHtml(s.components[0].comment)}</p>` : "");
-        subjectBlocks += `<div style="margin-top:0.7rem;">
-          <strong>${escapeHtml(subject)}: ${s.total}% — ${cbeFull(s.total)}</strong>
-          ${componentLines}
-        </div>`;
-      });
-      const termAvg = average(subjectTotals);
-      html += `<div class="term-block">
-        <h3>${escapeHtml(term)}</h3>
-        ${subjectBlocks}
-        <p style="margin-top:0.8rem;"><strong>Term average: ${termAvg.toFixed(1)}% — ${cbeFull(termAvg)}</strong></p>
-      </div>`;
-    });
-    const overallAvg = average(allSubjectTotals);
-    html += `<div class="term-block">
-      <h3>Overall, across all recorded terms</h3>
-      <p><strong>Overall average: ${overallAvg.toFixed(1)}% — ${cbeFull(overallAvg)}</strong></p>
-      <p class="muted">Based on ${student.results.length} recorded entr${student.results.length === 1 ? "y" : "ies"} across ${termOrder.length} term${termOrder.length === 1 ? "" : "s"}.</p>
-    </div>`;
-    return html;
-  }
 
-  function resultHistoryBlockHtml(student, downloadPath) {
-    const historyHtml = renderResultHistoryHtml(student);
-    if (!student.results.length) return historyHtml;
-    return `<div class="actions">
-        <button type="button" class="secondary" data-download-report="${escapeHtml(downloadPath)}" data-download-filename="${escapeHtml(student.reg_no)}_report_card.pdf">Download PDF report card</button>
-      </div>
-      ${historyHtml}`;
-  }
-  function wireReportDownloadButtons(container) {
-    container.querySelectorAll("[data-download-report]").forEach((btn) => {
-      btn.addEventListener("click", () => downloadReportCard(btn.dataset.downloadReport, btn.dataset.downloadFilename, btn));
-    });
-  }
+  navButtons.forEach((btn) => {
 
-  // ===================================================================
-  // NAVIGATION CONFIG — only includes sections that have real, working
-  // functionality behind them. Kept deliberately mapped 1:1 to what the
-  // system actually does, rather than a generic template menu.
-  // ===================================================================
-  const NAV = {
-    admin: [
-      { id: "dashboard", label: "Dashboard", path: "admin/dashboard" },
-      { id: "classes", label: "Classes", path: "admin/classes" },
-      { id: "teachers", label: "Teachers", children: [
-          { path: "admin/teachers", label: "All Teachers" },
-          { path: "admin/teachers/reset-password", label: "Reset Password" },
-        ] },
-      { id: "learners", label: "Learners", path: "admin/learners" },
-      { id: "reports", label: "Reports", path: "admin/reports" },
-      { id: "settings", label: "Settings", path: "admin/settings" },
-    ],
-    teacher: [
-      { id: "dashboard", label: "Dashboard", path: "teacher/dashboard" },
-      { id: "classes", label: "My Classes", path: "teacher/classes" },
-      { id: "marks", label: "Assessment / Marks", children: [
-          { path: "teacher/marks/enter", label: "Enter Marks" },
-          { path: "teacher/marks/edit", label: "Edit Marks" },
-        ] },
-    ],
-    student: [
-      { id: "dashboard", label: "Dashboard", path: "student/dashboard" },
-    ],
-  };
+    btn.addEventListener(
+      "click",
+      () => {
 
-  const DEFAULT_PATH = { admin: "admin/dashboard", teacher: "teacher/dashboard", student: "student/dashboard" };
+        navButtons.forEach((b) => {
 
-  const ROUTES = {
-    admin: {
-      "admin/dashboard": { label: "Dashboard", parent: null, render: pageAdminDashboard },
-      "admin/classes": { label: "Classes", parent: null, render: pageAdminClasses },
-      "admin/teachers": { label: "All Teachers", parent: "Teachers", render: pageAdminTeachersAll },
-      "admin/teachers/reset-password": { label: "Reset Password", parent: "Teachers", render: pageAdminTeachersResetPassword },
-      "admin/learners": { label: "Learners", parent: null, render: pageAdminLearners },
-      "admin/reports": { label: "Reports", parent: null, render: pageAdminReports },
-      "admin/settings": { label: "Settings", parent: null, render: pageAdminSettings },
-    },
-    teacher: {
-      "teacher/dashboard": { label: "Dashboard", parent: null, render: pageTeacherDashboard },
-      "teacher/classes": { label: "My Classes", parent: null, render: pageTeacherClasses },
-      "teacher/marks/enter": { label: "Enter Marks", parent: "Assessment / Marks", render: pageTeacherMarksEnter },
-      "teacher/marks/edit": { label: "Edit Marks", parent: "Assessment / Marks", render: pageTeacherMarksEdit },
-    },
-    student: {
-      "student/dashboard": { label: "Dashboard", parent: null, render: pageStudentDashboard },
-    },
-  };
+          b.setAttribute(
+            "aria-pressed",
+            "false"
+          );
 
-  function currentPath() {
-    return (location.hash || "").replace(/^#\/?/, "") || null;
-  }
-
-  // ---- Sidebar ----
-  function renderSidebar(role, activePath) {
-    const items = NAV[role];
-    sidebarNavEl.innerHTML = "";
-    items.forEach((item) => {
-      const wrapper = document.createElement("div");
-      wrapper.className = "nav-item";
-
-      if (item.children) {
-        const activeChild = item.children.find((c) => c.path === activePath);
-        const isExpanded = !!activeChild || expandedNavIds.has(item.id);
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "nav-top-btn" + (activeChild ? " has-active-child" : "");
-        btn.setAttribute("aria-expanded", isExpanded ? "true" : "false");
-        btn.innerHTML = `<span>${escapeHtml(item.label)}</span><span class="nav-chevron" aria-hidden="true">&#9656;</span>`;
-        btn.addEventListener("click", () => {
-          if (expandedNavIds.has(item.id)) expandedNavIds.delete(item.id);
-          else expandedNavIds.add(item.id);
-          renderSidebar(role, activePath);
         });
-        wrapper.appendChild(btn);
 
-        const list = document.createElement("ul");
-        list.className = "nav-children";
-        list.hidden = !isExpanded;
-        item.children.forEach((child) => {
-          const li = document.createElement("li");
-          const a = document.createElement("a");
-          a.href = "#/" + child.path;
-          a.textContent = child.label;
-          if (child.path === activePath) a.setAttribute("aria-current", "page");
-          a.addEventListener("click", closeMobileSidebar);
-          li.appendChild(a);
-          list.appendChild(li);
+
+        btn.setAttribute(
+          "aria-pressed",
+          "true"
+        );
+
+
+        panels.forEach((p) => {
+
+          p.classList.remove(
+            "active"
+          );
+
         });
-        wrapper.appendChild(list);
-      } else {
-        const a = document.createElement("a");
-        a.href = "#/" + item.path;
-        a.className = "nav-top-link";
-        a.innerHTML = `<span>${escapeHtml(item.label)}</span>`;
-        if (item.path === activePath) a.setAttribute("aria-current", "page");
-        a.addEventListener("click", closeMobileSidebar);
-        wrapper.appendChild(a);
+
+
+        document
+          .getElementById(
+            btn.dataset.target
+          )
+          .classList.add("active");
+
+
+        clearMessage();
+
+        refreshDropdowns();
+
+
+        if (
+          btn.dataset.target ===
+          "panel-list"
+        ) {
+
+          renderStudentList();
+
+        }
+
+
+        if (
+          btn.dataset.target ===
+          "panel-summary"
+        ) {
+
+          renderSummary();
+
+        }
+
       }
+    );
 
-      sidebarNavEl.appendChild(wrapper);
-    });
-  }
-
-  function closeMobileSidebar() {
-    sidebarEl.classList.remove("open");
-    sidebarOverlayEl.classList.remove("open");
-    mobileToggleEl.setAttribute("aria-expanded", "false");
-  }
-
-  // ---- Breadcrumb ----
-  function renderBreadcrumb(role, path) {
-    const route = ROUTES[role][path];
-    const parts = [];
-    const dashboardPath = DEFAULT_PATH[role];
-    if (path !== dashboardPath) {
-      parts.push(`<a href="#/${dashboardPath}">Dashboard</a>`);
-      parts.push(`<span class="crumb-sep" aria-hidden="true">&rsaquo;</span>`);
-    }
-    if (route.parent) {
-      parts.push(`<span>${escapeHtml(route.parent)}</span>`);
-      parts.push(`<span class="crumb-sep" aria-hidden="true">&rsaquo;</span>`);
-    }
-    parts.push(`<span class="crumb-current" aria-current="page">${escapeHtml(route.label)}</span>`);
-    breadcrumbEl.innerHTML = parts.join("");
-  }
-
-  // ---- Router ----
-  async function renderRoute() {
-    const role = session.role;
-    let path = currentPath();
-    if (!path || !ROUTES[role][path]) {
-      location.hash = "#/" + DEFAULT_PATH[role];
-      return; // hashchange will re-trigger renderRoute
-    }
-    renderSidebar(role, path);
-    renderBreadcrumb(role, path);
-    topbarUserEl.textContent = session.displayName + " (" + role.charAt(0).toUpperCase() + role.slice(1) + ")";
-    pageEl.innerHTML = "<p class='muted'>Loading…</p>";
-    try {
-      await ROUTES[role][path].render();
-    } catch (e) {
-      pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message || "Something went wrong.") + "</p>";
-    }
-    pageEl.focus();
-  }
-
-  window.addEventListener("hashchange", () => { if (session) renderRoute(); });
-
-  // ===================================================================
-  // Top-level render dispatcher
-  // ===================================================================
-  async function renderAll() {
-    if (!session) {
-      appShellEl.hidden = true;
-      loginScreenEl.hidden = false;
-      await renderLogin();
-    } else {
-      loginScreenEl.hidden = true;
-      appShellEl.hidden = false;
-      await renderRoute();
-    }
-  }
-
-  document.getElementById("btn-logout").addEventListener("click", () => {
-    session = null;
-    clearMessage();
-    location.hash = "";
-    renderAll();
   });
 
-  mobileToggleEl.addEventListener("click", () => {
-    const isOpen = sidebarEl.classList.toggle("open");
-    sidebarOverlayEl.classList.toggle("open", isOpen);
-    mobileToggleEl.setAttribute("aria-expanded", isOpen ? "true" : "false");
-  });
-  sidebarOverlayEl.addEventListener("click", closeMobileSidebar);
 
-  // -----------------------------------------------------------------
-  // LOGIN
-  // -----------------------------------------------------------------
-  async function renderLogin() {
-    loginContentEl.innerHTML = `
-      <div class="role-tabs" role="tablist" aria-label="Choose how you want to log in">
-        <button type="button" data-role="admin" aria-pressed="${loginRole==="admin"}">Administrator</button>
-        <button type="button" data-role="teacher" aria-pressed="${loginRole==="teacher"}">Teacher</button>
-        <button type="button" data-role="student" aria-pressed="${loginRole==="student"}">Student</button>
-      </div>
-      <div id="login-form-area">Loading…</div>
-    `;
-    loginContentEl.querySelectorAll(".role-tabs button").forEach((btn) => {
-      btn.addEventListener("click", () => { loginRole = btn.dataset.role; clearMessage(); renderAll(); });
-    });
+  /* -------------------------
+     ADD STUDENT
+  ------------------------- */
 
-    const area = document.getElementById("login-form-area");
+  document
+    .getElementById(
+      "btn-add-student"
+    )
+    .addEventListener(
+      "click",
+      () => {
 
-    if (loginRole === "admin") {
-      area.innerHTML = `
-        <fieldset>
-          <legend>Administrator login</legend>
-          ${passwordFieldHtml("admin-password", "Administrator password")}
-          <p class="muted">Default password is admin123 the first time the system is used. Change it after logging in.</p>
-          <div class="actions"><button type="button" class="primary" id="btn-admin-login">Log in</button></div>
-        </fieldset>`;
-      wirePasswordToggles(area);
-      const btn = document.getElementById("btn-admin-login");
-      btn.addEventListener("click", () => withLoadingButton(btn, "Logging in…", async () => {
-        try {
-          const pw = document.getElementById("admin-password").value;
-          const result = await api("/auth/admin/login", { method: "POST", body: JSON.stringify({ password: pw }) });
-          session = { token: result.token, role: result.role, displayName: result.display_name };
-          clearMessage(); renderAll();
-        } catch (e) { announce(e.message, true); }
-      }));
-    }
+        const input =
+          document.getElementById(
+            "new-student-name"
+          );
 
-    if (loginRole === "teacher") {
-      area.innerHTML = `
-        <fieldset>
-          <legend>Teacher login</legend>
-          <label for="teacher-username">Username</label>
-          <input type="text" id="teacher-username" autocomplete="off">
-          ${passwordFieldHtml("teacher-password", "Password")}
-          <p class="muted">Forgotten your password? Contact your school administrator — they can set a new one for you.</p>
-          <div class="actions"><button type="button" class="primary" id="btn-teacher-login">Log in</button></div>
-        </fieldset>`;
-      wirePasswordToggles(area);
-      const btn = document.getElementById("btn-teacher-login");
-      btn.addEventListener("click", () => withLoadingButton(btn, "Logging in…", async () => {
-        try {
-          const username = document.getElementById("teacher-username").value.trim();
-          const password = document.getElementById("teacher-password").value;
-          const result = await api("/auth/teacher/login", { method: "POST", body: JSON.stringify({ username, password }) });
-          session = { token: result.token, role: result.role, displayName: result.display_name };
-          clearMessage(); renderAll();
-        } catch (e) { announce(e.message, true); }
-      }));
-    }
 
-    if (loginRole === "student") {
-      let classes = [];
-      try { classes = await api("/public/classes"); } catch (e) { classes = []; }
-      const classOptions = classes.map((c) => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join("");
-      area.innerHTML = `
-        <fieldset>
-          <legend>Student login</legend>
-          <label for="student-regno">Registration number</label>
-          <input type="text" id="student-regno" autocomplete="off">
-          <label for="student-name">Full name</label>
-          <input type="text" id="student-name" autocomplete="off">
-          <label for="student-class">Class</label>
-          <select id="student-class"><option value="">Select your class</option>${classOptions}</select>
-          <p class="muted">Enter your registration number, full name, and current class exactly as your school has them on record.</p>
-          <div class="actions"><button type="button" class="primary" id="btn-student-login">View my results</button></div>
-        </fieldset>`;
-      const btn = document.getElementById("btn-student-login");
-      btn.addEventListener("click", () => withLoadingButton(btn, "Logging in…", async () => {
-        try {
-          const reg_no = document.getElementById("student-regno").value.trim();
-          const name = document.getElementById("student-name").value.trim();
-          const class_name = document.getElementById("student-class").value;
-          const result = await api("/auth/student/login", { method: "POST", body: JSON.stringify({ reg_no, name, class_name }) });
-          session = { token: result.token, role: result.role, displayName: result.display_name };
-          clearMessage(); renderAll();
-        } catch (e) { announce(e.message, true); }
-      }));
-    }
-  }
+        const name =
+          input.value.trim();
 
-  // ===================================================================
-  // ADMIN PAGES
-  // ===================================================================
 
-  async function pageAdminDashboard() {
-    let stats;
-    try { stats = await api("/admin/dashboard-stats"); } catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
-    const avgText = stats.average_performance == null ? "No results yet" : stats.average_performance.toFixed(1) + "%";
-    pageEl.innerHTML = `
-      <h2>Dashboard</h2>
-      <div class="stat-cards">
-        <div class="stat-card"><div class="stat-value">${stats.total_classes}</div><div class="stat-label">Total Classes</div></div>
-        <div class="stat-card"><div class="stat-value">${stats.total_teachers}</div><div class="stat-label">Total Teachers</div></div>
-        <div class="stat-card"><div class="stat-value">${stats.total_students}</div><div class="stat-label">Total Learners</div></div>
-        <div class="stat-card"><div class="stat-value">${avgText}</div><div class="stat-label">School-wide Average Performance</div></div>
-      </div>
-      <p class="muted">Use the menu on the left to manage classes, teachers, and learners, or to look up a learner's results.</p>
-    `;
-  }
+        if (!name) {
 
-  async function pageAdminClasses() {
-    let classes;
-    try { classes = await api("/admin/classes"); } catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
-    const classListHtml = classes.length
-      ? "<ul>" + classes.map((c) => `<li>${escapeHtml(c.name)} <button type="button" class="small secondary" data-remove-class="${escapeHtml(c.name)}">Remove</button></li>`).join("") + "</ul>"
-      : "<p class='muted'>No classes yet. Add one below.</p>";
-    pageEl.innerHTML = `
-      <h2>Classes</h2>
-      <fieldset>
-        <legend>Classes</legend>
-        ${classListHtml}
-        <label for="new-class-name">Add a new class</label>
-        <input type="text" id="new-class-name" placeholder="e.g. Grade 5">
-        <div class="actions"><button type="button" class="primary" id="btn-add-class">Add class</button></div>
-      </fieldset>
-    `;
-    document.getElementById("btn-add-class").addEventListener("click", async () => {
-      const name = document.getElementById("new-class-name").value.trim();
-      if (!name) { announce("Please enter a class name.", true); return; }
-      try { await api("/admin/classes", { method: "POST", body: JSON.stringify({ name }) }); announce("Class \"" + name + "\" added.", false); pageAdminClasses(); }
-      catch (e) { announce(e.message, true); }
-    });
-    pageEl.querySelectorAll("[data-remove-class]").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        if (!window.confirm("Remove the class \"" + btn.dataset.removeClass + "\"? Students already in it keep the label until reassigned.")) return;
-        try { await api("/admin/classes/" + encodeURIComponent(btn.dataset.removeClass), { method: "DELETE" }); announce("Class removed.", false); pageAdminClasses(); }
-        catch (e) { announce(e.message, true); }
+          announce(
+            "Please enter a student's name.",
+            true
+          );
+
+          return;
+
+        }
+
+
+        if (data[name]) {
+
+          announce(
+            name +
+            " is already enrolled.",
+            true
+          );
+
+          return;
+
+        }
+
+
+        data[name] = {};
+
+        input.value = "";
+
+
+        announce(
+          name +
+          " has been added to St. Lucy's School for the Blind.",
+          false
+        );
+
+
+        refreshDropdowns();
+
+      }
+    );
+
+
+  /* -------------------------
+     DROPDOWNS
+  ------------------------- */
+
+  function refreshDropdowns() {
+
+    const names =
+      Object.keys(data).sort();
+
+
+    [
+      document.getElementById(
+        "grade-student-select"
+      ),
+
+      document.getElementById(
+        "report-student-select"
+      )
+
+    ].forEach((select) => {
+
+      const previous =
+        select.value;
+
+
+      select.innerHTML = "";
+
+
+      if (names.length === 0) {
+
+        const opt =
+          document.createElement(
+            "option"
+          );
+
+
+        opt.textContent =
+          "No students enrolled yet";
+
+
+        opt.value = "";
+
+
+        select.appendChild(opt);
+
+
+        return;
+
+      }
+
+
+      names.forEach((name) => {
+
+        const opt =
+          document.createElement(
+            "option"
+          );
+
+
+        opt.value = name;
+
+        opt.textContent = name;
+
+
+        select.appendChild(opt);
+
       });
+
+
+      if (names.includes(previous)) {
+
+        select.value = previous;
+
+      }
+
     });
+
   }
 
-  async function pageAdminTeachersAll() {
-    let classes, teachers;
-    try { [classes, teachers] = await Promise.all([api("/admin/classes"), api("/admin/teachers")]); }
-    catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
 
-    const teacherRows = teachers.map((t) => `<tr>
-        <td>${escapeHtml(t.name)}</td><td>${escapeHtml(t.username)}</td>
-        <td>${t.classes.map(escapeHtml).join(", ") || "None"}</td>
-      </tr>`).join("");
-    const classCheckboxes = classes.map((c) =>
-      `<label class="inline"><input type="checkbox" value="${escapeHtml(c.name)}" class="teacher-class-cb"> ${escapeHtml(c.name)}</label>`
-    ).join("");
+  /* -------------------------
+     ADD GRADE
+  ------------------------- */
 
-    pageEl.innerHTML = `
-      <h2>All Teachers</h2>
-      <fieldset>
-        <legend>Add a teacher</legend>
-        <label for="teacher-name">Teacher's full name</label>
-        <input type="text" id="teacher-name">
-        <label for="new-teacher-username">Username</label>
-        <input type="text" id="new-teacher-username" autocomplete="off">
-        ${passwordFieldHtml("new-teacher-password", "Password")}
-        <label>Classes this teacher can access</label>
-        ${classCheckboxes || "<p class='muted'>No classes available yet.</p>"}
-        <div class="actions"><button type="button" class="primary" id="btn-add-teacher">Add teacher</button></div>
-        ${teacherRows ? `<table><caption>Current teachers</caption>
-          <tr><th scope="col">Name</th><th scope="col">Username</th><th scope="col">Assigned classes</th></tr>${teacherRows}</table>`
-          : "<p class='muted'>No teachers added yet.</p>"}
-      </fieldset>
+  document
+    .getElementById(
+      "btn-add-grade"
+    )
+    .addEventListener(
+      "click",
+      () => {
 
-      <fieldset>
-        <legend>Reassign a teacher's classes</legend>
-        <p class="muted">Forgot to give a teacher access to a class? Pick them below and update.</p>
-        <label for="reassign-teacher-select">Teacher</label>
-        <select id="reassign-teacher-select">
-          <option value="">Select a teacher</option>
-          ${teachers.map((t) => `<option value="${escapeHtml(t.username)}">${escapeHtml(t.name)} (${escapeHtml(t.username)})</option>`).join("")}
-        </select>
-        <div id="reassign-class-checkboxes">${
-          classes.length
-            ? classes.map((c) => `<label class="inline"><input type="checkbox" value="${escapeHtml(c.name)}" class="reassign-class-cb"> ${escapeHtml(c.name)}</label>`).join("")
-            : "<p class='muted'>No classes available yet.</p>"
-        }</div>
-        <div class="actions"><button type="button" class="primary" id="btn-reassign-classes">Update classes</button></div>
-      </fieldset>
-    `;
-    wirePasswordToggles(pageEl);
+        const name =
+          document.getElementById(
+            "grade-student-select"
+          ).value;
 
-    document.getElementById("btn-add-teacher").addEventListener("click", async () => {
-      const name = document.getElementById("teacher-name").value.trim();
-      const username = document.getElementById("new-teacher-username").value.trim();
-      const password = document.getElementById("new-teacher-password").value;
-      const assigned = Array.from(pageEl.querySelectorAll(".teacher-class-cb:checked")).map((cb) => cb.value);
-      if (!name || !username || !password) { announce("Please fill in the teacher's name, username, and password.", true); return; }
-      try {
-        await api("/admin/teachers", { method: "POST", body: JSON.stringify({ name, username, password, classes: assigned }) });
-        announce("Teacher account created for " + name + ".", false); pageAdminTeachersAll();
-      } catch (e) { announce(e.message, true); }
-    });
 
-    const reassignSelect = document.getElementById("reassign-teacher-select");
-    reassignSelect.addEventListener("change", () => {
-      const teacher = teachers.find((t) => t.username === reassignSelect.value);
-      const currentClasses = teacher ? teacher.classes : [];
-      pageEl.querySelectorAll(".reassign-class-cb").forEach((cb) => { cb.checked = currentClasses.includes(cb.value); });
-    });
-    document.getElementById("btn-reassign-classes").addEventListener("click", async () => {
-      const username = reassignSelect.value;
-      if (!username) { announce("Please choose a teacher first.", true); return; }
-      const selected = Array.from(pageEl.querySelectorAll(".reassign-class-cb:checked")).map((cb) => cb.value);
-      try {
-        await api("/admin/teachers/" + encodeURIComponent(username) + "/classes", { method: "PUT", body: JSON.stringify({ classes: selected }) });
-        announce("Updated classes for that teacher.", false); pageAdminTeachersAll();
-      } catch (e) { announce(e.message, true); }
-    });
-  }
+        const subject =
+          document.getElementById(
+            "grade-subject"
+          ).value.trim();
 
-  async function pageAdminTeachersResetPassword() {
-    let teachers;
-    try { teachers = await api("/admin/teachers"); } catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
-    pageEl.innerHTML = `
-      <h2>Reset a Teacher's Password</h2>
-      <fieldset>
-        <legend>Reset password</legend>
-        <p class="muted">Passwords can't be viewed for security reasons — only reset to something new.</p>
-        <label for="reset-pw-teacher-select">Teacher</label>
-        <select id="reset-pw-teacher-select">
-          <option value="">Select a teacher</option>
-          ${teachers.map((t) => `<option value="${escapeHtml(t.username)}">${escapeHtml(t.name)} (${escapeHtml(t.username)})</option>`).join("")}
-        </select>
-        ${passwordFieldHtml("reset-pw-new-password", "New password")}
-        <div class="actions"><button type="button" class="primary" id="btn-reset-teacher-password">Set new password</button></div>
-      </fieldset>
-    `;
-    wirePasswordToggles(pageEl);
-    document.getElementById("btn-reset-teacher-password").addEventListener("click", async () => {
-      const username = document.getElementById("reset-pw-teacher-select").value;
-      const newPassword = document.getElementById("reset-pw-new-password").value;
-      if (!username) { announce("Please choose a teacher first.", true); return; }
-      if (!newPassword) { announce("Please enter a new password.", true); return; }
-      try {
-        await api("/admin/teachers/" + encodeURIComponent(username) + "/password", { method: "PUT", body: JSON.stringify({ new_password: newPassword }) });
-        announce("Password reset. Let the teacher know their new password.", false);
-        document.getElementById("reset-pw-new-password").value = "";
-      } catch (e) { announce(e.message, true); }
-    });
-  }
 
-  async function pageAdminLearners() {
-    let classes, students;
-    try { [classes, students] = await Promise.all([api("/admin/classes"), api("/admin/students")]); }
-    catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
+        const scoreRaw =
+          document.getElementById(
+            "grade-score"
+          ).value;
 
-    const studentRows = students.map((s) => `<tr>
-        <td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.reg_no)}</td>
-        <td>${escapeHtml(s.class_name || "Unassigned")}</td><td>${s.result_count}</td>
-      </tr>`).join("");
-    const classOptions = classes.map((c) => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join("");
 
-    pageEl.innerHTML = `
-      <h2>Learners</h2>
-      <fieldset>
-        <legend>Enroll a learner</legend>
-        <label for="new-student-regno">Registration number</label>
-        <input type="text" id="new-student-regno" autocomplete="off">
-        <label for="new-student-name">Full name</label>
-        <input type="text" id="new-student-name">
-        <label for="new-student-class">Class</label>
-        <select id="new-student-class"><option value="">Select a class</option>${classOptions}</select>
-        <div class="actions"><button type="button" class="primary" id="btn-add-student">Enroll learner</button></div>
-        ${studentRows ? `<table><caption>Currently enrolled learners</caption>
-          <tr><th scope="col">Name</th><th scope="col">Registration number</th><th scope="col">Class</th><th scope="col">Recorded results</th></tr>${studentRows}</table>`
-          : "<p class='muted'>No learners enrolled yet.</p>"}
-      </fieldset>
-    `;
-    document.getElementById("btn-add-student").addEventListener("click", async () => {
-      const reg_no = document.getElementById("new-student-regno").value.trim();
-      const name = document.getElementById("new-student-name").value.trim();
-      const class_name = document.getElementById("new-student-class").value;
-      if (!reg_no || !name || !class_name) { announce("Please fill in registration number, name, and class.", true); return; }
-      try {
-        await api("/admin/students", { method: "POST", body: JSON.stringify({ reg_no, name, class_name }) });
-        announce(name + " has been enrolled in " + class_name + ".", false); pageAdminLearners();
-      } catch (e) { announce(e.message, true); }
-    });
-  }
+        if (!name) {
 
-  async function pageAdminReports() {
-    pageEl.innerHTML = `
-      <h2>Reports</h2>
-      <fieldset>
-        <legend>Look up a learner's full results</legend>
-        <label for="admin-view-regno">Registration number</label>
-        <input type="text" id="admin-view-regno" autocomplete="off">
-        <div class="actions"><button type="button" class="secondary" id="btn-admin-view">Show results</button></div>
-        <div id="admin-view-output"></div>
-      </fieldset>
-    `;
-    document.getElementById("btn-admin-view").addEventListener("click", async () => {
-      const reg_no = document.getElementById("admin-view-regno").value.trim();
-      const output = document.getElementById("admin-view-output");
-      try {
-        const student = await api("/admin/students/" + encodeURIComponent(reg_no) + "/results");
-        output.innerHTML = resultHistoryBlockHtml(student, "/admin/students/" + encodeURIComponent(reg_no) + "/report-card");
-        wireReportDownloadButtons(output);
-      } catch (e) { output.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; }
-    });
-  }
+          announce(
+            "Add a student first, then come back to record a grade.",
+            true
+          );
 
-  async function pageAdminSettings() {
-    pageEl.innerHTML = `
-      <h2>Settings</h2>
-      <fieldset>
-        <legend>Administrator password</legend>
-        ${passwordFieldHtml("admin-new-password", "Change administrator password")}
-        <div class="actions"><button type="button" class="secondary" id="btn-change-admin-password">Update password</button></div>
-      </fieldset>
-    `;
-    wirePasswordToggles(pageEl);
-    document.getElementById("btn-change-admin-password").addEventListener("click", async () => {
-      const newPw = document.getElementById("admin-new-password").value;
-      if (!newPw) { announce("Please enter a new password.", true); return; }
-      try {
-        await api("/admin/password", { method: "PUT", body: JSON.stringify({ new_password: newPw }) });
-        announce("Administrator password updated.", false);
-        document.getElementById("admin-new-password").value = "";
-      } catch (e) { announce(e.message, true); }
-    });
-  }
+          return;
 
-  // ===================================================================
-  // TEACHER PAGES
-  // ===================================================================
+        }
 
-  async function pageTeacherDashboard() {
-    let me, stats;
-    try { [me, stats] = await Promise.all([api("/teacher/me"), api("/teacher/dashboard-stats")]); }
-    catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
-    const avgText = stats.average_performance == null ? "No results yet" : stats.average_performance.toFixed(1) + "%";
-    pageEl.innerHTML = `
-      <h2>Welcome, ${escapeHtml(me.name)}</h2>
-      <div class="stat-cards">
-        <div class="stat-card"><div class="stat-value">${stats.total_classes}</div><div class="stat-label">My Classes</div></div>
-        <div class="stat-card"><div class="stat-value">${stats.total_students}</div><div class="stat-label">My Learners</div></div>
-        <div class="stat-card"><div class="stat-value">${avgText}</div><div class="stat-label">Average Performance</div></div>
-      </div>
-      <p class="muted">You have access to: ${me.classes.length ? me.classes.map(escapeHtml).join(", ") : "no classes yet — ask an administrator to assign you one."}</p>
-    `;
-  }
 
-  async function pageTeacherClasses() {
-    let me;
-    try { me = await api("/teacher/me"); } catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
-    const classOptions = me.classes.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+        if (!subject) {
 
-    pageEl.innerHTML = `
-      <h2>My Classes</h2>
-      <fieldset>
-        <legend>Enroll or move a learner into your class</legend>
-        <label for="t-student-regno">Registration number</label>
-        <input type="text" id="t-student-regno" autocomplete="off">
-        <label for="t-student-name">Full name (only needed for a new learner)</label>
-        <input type="text" id="t-student-name">
-        <label for="t-student-class">Class</label>
-        <select id="t-student-class"><option value="">Select a class</option>${classOptions}</select>
-        <div class="actions"><button type="button" class="primary" id="btn-t-set-class">Save</button></div>
-      </fieldset>
+          announce(
+            "Please enter a subject name.",
+            true
+          );
 
-      <fieldset>
-        <legend>View a class roster</legend>
-        <label for="t-view-class">Class</label>
-        <select id="t-view-class"><option value="">Select a class</option>${classOptions}</select>
-        <div id="t-class-roster"></div>
-        <div id="t-student-history"></div>
-      </fieldset>
-    `;
+          return;
 
-    document.getElementById("btn-t-set-class").addEventListener("click", async () => {
-      const reg_no = document.getElementById("t-student-regno").value.trim();
-      const name = document.getElementById("t-student-name").value.trim();
-      const class_name = document.getElementById("t-student-class").value;
-      if (!reg_no || !class_name) { announce("Please enter a registration number and choose a class.", true); return; }
-      try {
-        await api("/teacher/students", { method: "POST", body: JSON.stringify({ reg_no, name: name || null, class_name }) });
-        announce("Saved.", false); pageTeacherClasses();
-      } catch (e) { announce(e.message, true); }
-    });
+        }
 
-    const viewClassSelect = document.getElementById("t-view-class");
-    viewClassSelect.addEventListener("change", async () => {
-      const className = viewClassSelect.value;
-      const rosterEl = document.getElementById("t-class-roster");
-      document.getElementById("t-student-history").innerHTML = "";
-      if (!className) { rosterEl.innerHTML = ""; return; }
-      try {
-        const roster = await api("/teacher/classes/" + encodeURIComponent(className) + "/students");
-        if (!roster.length) { rosterEl.innerHTML = "<p class='muted'>No learners in this class yet.</p>"; return; }
-        const rows = roster.map((s) => `<tr>
-          <td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.reg_no)}</td><td>${s.result_count}</td>
-          <td>
-            <button type="button" class="small secondary" data-show-history="${escapeHtml(s.reg_no)}">View history</button>
-            <button type="button" class="small danger" data-remove-student="${escapeHtml(s.reg_no)}" data-student-name="${escapeHtml(s.name)}">Remove from class</button>
-          </td>
-        </tr>`).join("");
-        rosterEl.innerHTML = `<table><caption>${escapeHtml(className)} roster</caption>
-          <tr><th scope="col">Name</th><th scope="col">Registration number</th><th scope="col">Results recorded</th><th scope="col">Actions</th></tr>${rows}</table>`;
-        rosterEl.querySelectorAll("[data-show-history]").forEach((btn) => {
-          btn.addEventListener("click", async () => {
-            try {
-              const regNo = btn.dataset.showHistory;
-              const student = await api("/teacher/students/" + encodeURIComponent(regNo) + "/results");
-              const historyEl = document.getElementById("t-student-history");
-              historyEl.innerHTML = resultHistoryBlockHtml(student, "/teacher/students/" + encodeURIComponent(regNo) + "/report-card");
-              wireReportDownloadButtons(historyEl);
-            } catch (e) { announce(e.message, true); }
-          });
-        });
-        rosterEl.querySelectorAll("[data-remove-student]").forEach((btn) => {
-          btn.addEventListener("click", async () => {
-            const regNo = btn.dataset.removeStudent;
-            const studentName = btn.dataset.studentName;
-            if (!window.confirm("Remove " + studentName + " from " + className + "? Their result history is kept, but they'll no longer show in this class until reassigned.")) return;
-            try {
-              await api("/teacher/students/" + encodeURIComponent(regNo) + "/class", { method: "DELETE" });
-              announce(studentName + " has been removed from " + className + ".", false);
-              viewClassSelect.dispatchEvent(new Event("change"));
-            } catch (e) { announce(e.message, true); }
-          });
-        });
-      } catch (e) { announce(e.message, true); }
-    });
-  }
 
-  async function pageTeacherMarksEnter() {
-    let me;
-    try { me = await api("/teacher/me"); } catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
-    const classOptions = me.classes.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+        const score =
+          Number(scoreRaw);
 
-    pageEl.innerHTML = `
-      <h2>Enter Marks</h2>
-      <fieldset>
-        <legend>Record a result</legend>
-        <label for="t-grade-class">Class</label>
-        <select id="t-grade-class"><option value="">Select a class</option>${classOptions}</select>
-        <label for="t-grade-student">Learner</label>
-        <select id="t-grade-student"><option value="">Select a class first</option></select>
-        <label for="t-grade-term">Term or period (e.g. Term 1 2026)</label>
-        <input type="text" id="t-grade-term">
-        <label for="t-grade-subject">Subject</label>
-        <input type="text" id="t-grade-subject">
-        ${scoreEntryFieldsHtml("t-grade", "level")}
-        <label for="t-grade-comment">Comment / rubric note (optional) — e.g. "CAT 1", "Group work", or feedback on what the level was based on</label>
-        <textarea id="t-grade-comment"></textarea>
-        <p class="muted">If you enter more than one result for the same learner, subject, and term, they will be added together as the total for that subject.</p>
-        <div class="actions"><button type="button" class="primary" id="btn-t-add-grade">Record result</button></div>
-      </fieldset>
-    `;
-    wireScoreEntryToggle(pageEl, "t-grade");
 
-    const gradeClassSelect = document.getElementById("t-grade-class");
-    const gradeStudentSelect = document.getElementById("t-grade-student");
-    gradeClassSelect.addEventListener("change", async () => {
-      const className = gradeClassSelect.value;
-      if (!className) { gradeStudentSelect.innerHTML = "<option value=''>Select a class first</option>"; return; }
-      try {
-        const roster = await api("/teacher/classes/" + encodeURIComponent(className) + "/students");
-        gradeStudentSelect.innerHTML = roster.length
-          ? roster.map((s) => `<option value="${escapeHtml(s.reg_no)}">${escapeHtml(s.name)} (${escapeHtml(s.reg_no)})</option>`).join("")
-          : "<option value=''>No learners in this class</option>";
-      } catch (e) { announce(e.message, true); }
-    });
+        if (
+          scoreRaw === "" ||
+          isNaN(score) ||
+          score < 0 ||
+          score > 100
+        ) {
 
-    document.getElementById("btn-t-add-grade").addEventListener("click", async () => {
-      const reg_no = gradeStudentSelect.value;
-      const term = document.getElementById("t-grade-term").value.trim();
-      const subject = document.getElementById("t-grade-subject").value.trim();
-      const comment = document.getElementById("t-grade-comment").value.trim();
-      const entry = readScoreEntry(pageEl, "t-grade");
-      if (!reg_no) { announce("Please choose a class and a learner.", true); return; }
-      if (!term) { announce("Please enter a term or period.", true); return; }
-      if (!subject) { announce("Please enter a subject.", true); return; }
-      if (!entry.valid) { announce("Please enter a valid score between 0 and 100.", true); return; }
-      try {
-        await api("/teacher/results", { method: "POST", body: JSON.stringify({ reg_no, term, subject, score: entry.score, comment: comment || null }) });
-        announce("Result recorded.", false);
-        document.getElementById("t-grade-term").value = "";
-        document.getElementById("t-grade-subject").value = "";
-        document.getElementById("t-grade-comment").value = "";
-      } catch (e) { announce(e.message, true); }
-    });
-  }
+          announce(
+            "Please enter a valid score between 0 and 100.",
+            true
+          );
 
-  async function pageTeacherMarksEdit() {
-    let me;
-    try { me = await api("/teacher/me"); } catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
-    const classOptions = me.classes.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+          return;
 
-    pageEl.innerHTML = `
-      <h2>Edit Marks</h2>
-      <fieldset>
-        <legend>Edit or remove a recorded result</legend>
-        <label for="t-edit-class">Class</label>
-        <select id="t-edit-class"><option value="">Select a class</option>${classOptions}</select>
-        <label for="t-edit-student">Learner</label>
-        <select id="t-edit-student"><option value="">Select a class first</option></select>
-        <div class="actions"><button type="button" class="secondary" id="btn-t-load-results">Load results</button></div>
-        <div id="t-edit-results-list"></div>
-      </fieldset>
-    `;
+        }
 
-    const editClassSelect = document.getElementById("t-edit-class");
-    const editStudentSelect = document.getElementById("t-edit-student");
-    editClassSelect.addEventListener("change", async () => {
-      const className = editClassSelect.value;
-      if (!className) { editStudentSelect.innerHTML = "<option value=''>Select a class first</option>"; return; }
-      try {
-        const roster = await api("/teacher/classes/" + encodeURIComponent(className) + "/students");
-        editStudentSelect.innerHTML = roster.length
-          ? roster.map((s) => `<option value="${escapeHtml(s.reg_no)}">${escapeHtml(s.name)} (${escapeHtml(s.reg_no)})</option>`).join("")
-          : "<option value=''>No learners in this class</option>";
-      } catch (e) { announce(e.message, true); }
-    });
 
-    document.getElementById("btn-t-load-results").addEventListener("click", async () => {
-      const reg_no = editStudentSelect.value;
-      const listEl = document.getElementById("t-edit-results-list");
-      if (!reg_no) { announce("Please choose a class and a learner.", true); return; }
-      try {
-        const student = await api("/teacher/students/" + encodeURIComponent(reg_no) + "/results");
-        renderEditableResultsList(listEl, student);
-      } catch (e) { announce(e.message, true); }
-    });
-  }
+        if (!data[name][subject]) {
 
-  function renderEditableResultsList(container, student) {
-    if (!student.results.length) {
-      container.innerHTML = "<p class='muted'>No results recorded for " + escapeHtml(student.name) + " yet.</p>";
+          data[name][subject] = [];
+
+        }
+
+
+        data[name][subject].push(
+          score
+        );
+
+
+        document.getElementById(
+          "grade-subject"
+        ).value = "";
+
+
+        document.getElementById(
+          "grade-score"
+        ).value = "";
+
+
+        announce(
+          "Recorded " +
+          subject +
+          " score of " +
+          score +
+          " for " +
+          name +
+          ".",
+          false
+        );
+
+      }
+    );
+
+
+  /* -------------------------
+     REPORT CARD
+  ------------------------- */
+
+  document
+    .getElementById(
+      "btn-show-report"
+    )
+    .addEventListener(
+      "click",
+      () => {
+
+        const name =
+          document.getElementById(
+            "report-student-select"
+          ).value;
+
+
+        const output =
+          document.getElementById(
+            "report-output"
+          );
+
+
+        output.innerHTML = "";
+
+
+        if (!name) {
+
+          announce(
+            "No student selected.",
+            true
+          );
+
+          return;
+
+        }
+
+
+        const subjects =
+          data[name];
+
+
+        const heading =
+          document.createElement(
+            "h3"
+          );
+
+
+        heading.textContent =
+          "Report card for " +
+          name;
+
+
+        output.appendChild(
+          heading
+        );
+
+
+        const subjectNames =
+          Object.keys(subjects);
+
+
+        if (
+          subjectNames.length === 0
+        ) {
+
+          const p =
+            document.createElement(
+              "p"
+            );
+
+
+          p.textContent =
+            "No grades have been recorded yet.";
+
+
+          output.appendChild(p);
+
+          return;
+
+        }
+
+
+        let allScores = [];
+
+
+        subjectNames.forEach(
+          (subject) => {
+
+            const scores =
+              subjects[subject];
+
+
+            const avg =
+              average(scores);
+
+
+            allScores =
+              allScores.concat(
+                scores
+              );
+
+
+            const p =
+              document.createElement(
+                "p"
+              );
+
+
+            p.textContent =
+              "Subject: " +
+              subject +
+              ". Average score: " +
+              avg.toFixed(1) +
+              ". Grade: " +
+              letterGrade(avg) +
+              ".";
+
+
+            output.appendChild(p);
+
+          }
+        );
+
+
+        const overallAvg =
+          average(allScores);
+
+
+        const overall =
+          document.createElement(
+            "p"
+          );
+
+
+        overall.style.fontWeight =
+          "bold";
+
+
+        overall.textContent =
+          "Overall average: " +
+          overallAvg.toFixed(1) +
+          ". Overall grade: " +
+          letterGrade(overallAvg) +
+          ".";
+
+
+        output.appendChild(
+          overall
+        );
+
+      }
+    );
+
+
+  /* -------------------------
+     STUDENT LIST
+  ------------------------- */
+
+  function renderStudentList() {
+
+    const output =
+      document.getElementById(
+        "list-output"
+      );
+
+
+    output.innerHTML = "";
+
+
+    const names =
+      Object.keys(data).sort();
+
+
+    if (names.length === 0) {
+
+      const p =
+        document.createElement(
+          "p"
+        );
+
+
+      p.textContent =
+        "No students are currently enrolled.";
+
+
+      output.appendChild(p);
+
+
       return;
+
     }
-    container.innerHTML = `<h3>Results for ${escapeHtml(student.name)}</h3>` + student.results.map((r) => `
-      <div class="result-row" data-result-id="${r.id}">
-        <div class="view-mode">
-          <p><strong>${escapeHtml(r.term)} — ${escapeHtml(r.subject)}: ${r.score}%</strong></p>
-          ${r.comment ? `<p class="muted">${escapeHtml(r.comment)}</p>` : ""}
-          <div class="actions">
-            <button type="button" class="small secondary" data-edit-result="${r.id}">Edit</button>
-            <button type="button" class="small danger" data-delete-result="${r.id}">Delete</button>
-          </div>
-        </div>
-      </div>
-    `).join("");
 
-    container.querySelectorAll("[data-delete-result]").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        if (!window.confirm("Delete this result? This cannot be undone.")) return;
-        try {
-          await api("/teacher/results/" + btn.dataset.deleteResult, { method: "DELETE" });
-          announce("Result deleted.", false);
-          const updated = await api("/teacher/students/" + encodeURIComponent(student.reg_no) + "/results");
-          renderEditableResultsList(container, updated);
-        } catch (e) { announce(e.message, true); }
-      });
+
+    const list =
+      document.createElement(
+        "ol"
+      );
+
+
+    names.forEach((name) => {
+
+      const li =
+        document.createElement(
+          "li"
+        );
+
+
+      li.textContent = name;
+
+
+      list.appendChild(li);
+
     });
 
-    container.querySelectorAll("[data-edit-result]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const row = btn.closest(".result-row");
-        const resultId = btn.dataset.editResult;
-        const idPrefix = "edit-" + resultId;
-        const r = student.results.find((x) => String(x.id) === String(resultId));
-        const defaultMode = levelForScore(r.score) ? "level" : "number";
-        row.querySelector(".view-mode").innerHTML = `
-          <label>Term or period</label>
-          <input type="text" class="edit-term" value="${escapeHtml(r.term)}">
-          <label>Subject</label>
-          <input type="text" class="edit-subject" value="${escapeHtml(r.subject)}">
-          ${scoreEntryFieldsHtml(idPrefix, defaultMode)}
-          <label>Comment / rubric note</label>
-          <textarea class="edit-comment">${escapeHtml(r.comment || "")}</textarea>
-          <div class="actions">
-            <button type="button" class="small primary" data-save-result="${r.id}">Save</button>
-            <button type="button" class="small secondary" data-cancel-edit>Cancel</button>
-          </div>
-        `;
-        if (defaultMode === "level") document.getElementById(idPrefix + "-level").value = levelForScore(r.score);
-        else document.getElementById(idPrefix + "-score").value = r.score;
-        wireScoreEntryToggle(row, idPrefix);
 
-        row.querySelector("[data-save-result]").addEventListener("click", async () => {
-          const term = row.querySelector(".edit-term").value.trim();
-          const subject = row.querySelector(".edit-subject").value.trim();
-          const comment = row.querySelector(".edit-comment").value.trim();
-          const entry = readScoreEntry(row, idPrefix);
-          if (!term || !subject || !entry.valid) { announce("Please fill in a valid term, subject, and score between 0 and 100.", true); return; }
+    output.appendChild(
+      list
+    );
+
+  }
+
+
+  /* -------------------------
+     CLASS SUMMARY
+  ------------------------- */
+
+  function renderSummary() {
+
+    const output =
+      document.getElementById(
+        "summary-output"
+      );
+
+
+    output.innerHTML = "";
+
+
+    const names =
+      Object.keys(data).sort();
+
+
+    if (names.length === 0) {
+
+      const p =
+        document.createElement(
+          "p"
+        );
+
+
+      p.textContent =
+        "No students are currently enrolled.";
+
+
+      output.appendChild(p);
+
+
+      return;
+
+    }
+
+
+    names.forEach((name) => {
+
+      const subjects =
+        data[name];
+
+
+      const allScores =
+        Object.values(subjects)
+          .flat();
+
+
+      const div =
+        document.createElement(
+          "div"
+        );
+
+
+      div.className =
+        "record";
+
+
+      const h3 =
+        document.createElement(
+          "h3"
+        );
+
+
+      h3.textContent = name;
+
+
+      div.appendChild(h3);
+
+
+      const p =
+        document.createElement(
+          "p"
+        );
+
+
+      if (allScores.length === 0) {
+
+        p.textContent =
+          "No grades recorded yet.";
+
+      } else {
+
+        const avg =
+          average(allScores);
+
+
+        p.textContent =
+          "Overall average: " +
+          avg.toFixed(1) +
+          ". Overall grade: " +
+          letterGrade(avg) +
+          ".";
+
+      }
+
+
+      div.appendChild(p);
+
+
+      output.appendChild(div);
+
+    });
+
+  }
+
+
+  /* -------------------------
+     SAVE DATA
+  ------------------------- */
+
+  document
+    .getElementById(
+      "btn-export"
+    )
+    .addEventListener(
+      "click",
+      () => {
+
+        const blob =
+          new Blob(
+            [
+              JSON.stringify(
+                data,
+                null,
+                2
+              )
+            ],
+            {
+              type:
+                "application/json"
+            }
+          );
+
+
+        const url =
+          URL.createObjectURL(
+            blob
+          );
+
+
+        const a =
+          document.createElement(
+            "a"
+          );
+
+
+        a.href = url;
+
+
+        a.download =
+          "stlucys_students.json";
+
+
+        document.body.appendChild(
+          a
+        );
+
+
+        a.click();
+
+
+        document.body.removeChild(
+          a
+        );
+
+
+        URL.revokeObjectURL(
+          url
+        );
+
+
+        announce(
+          "Save file downloaded. Keep it somewhere you can find it, such as the Downloads folder.",
+          false
+        );
+
+      }
+    );
+
+
+  /* -------------------------
+     LOAD DATA
+  ------------------------- */
+
+  document
+    .getElementById(
+      "import-file"
+    )
+    .addEventListener(
+      "change",
+      (event) => {
+
+        const file =
+          event.target.files[0];
+
+
+        if (!file) return;
+
+
+        const reader =
+          new FileReader();
+
+
+        reader.onload = () => {
+
           try {
-            await api("/teacher/results/" + resultId, { method: "PUT", body: JSON.stringify({ term, subject, score: entry.score, comment: comment || null }) });
-            announce("Result updated.", false);
-            const updated = await api("/teacher/students/" + encodeURIComponent(student.reg_no) + "/results");
-            renderEditableResultsList(container, updated);
-          } catch (e) { announce(e.message, true); }
-        });
-        row.querySelector("[data-cancel-edit]").addEventListener("click", () => renderEditableResultsList(container, student));
-      });
-    });
+
+            const loaded =
+              JSON.parse(
+                reader.result
+              );
+
+
+            data = loaded;
+
+
+            refreshDropdowns();
+
+
+            renderStudentList();
+
+
+            renderSummary();
+
+
+            announce(
+              "Save file loaded successfully.",
+              false
+            );
+
+
+          } catch (e) {
+
+            announce(
+              "That file could not be read. Please choose a valid save file.",
+              true
+            );
+
+          }
+
+        };
+
+
+        reader.readAsText(file);
+
+
+        event.target.value = "";
+
+      }
+    );
+
+
+  /* -------------------------
+     LIGHT / DARK THEME
+  ------------------------- */
+
+  const themeButton =
+    document.getElementById(
+      "theme-button"
+    );
+
+
+  const themeMenu =
+    document.getElementById(
+      "theme-menu"
+    );
+
+
+  const themeOptions =
+    document.querySelectorAll(
+      ".theme-option"
+    );
+
+
+  function applyTheme(theme) {
+
+    document.documentElement
+      .setAttribute(
+        "data-theme",
+        theme
+      );
+
+
+    localStorage.setItem(
+      "stlucys-theme",
+      theme
+    );
+
+
+    themeOptions.forEach(
+      (option) => {
+
+        option.setAttribute(
+          "aria-checked",
+          option.dataset.themeChoice === theme
+            ? "true"
+            : "false"
+        );
+
+      }
+    );
+
+
+    themeButton.setAttribute(
+      "aria-label",
+      theme === "dark"
+        ? "Theme: dark mode"
+        : "Theme: light mode"
+    );
+
   }
 
-  // ===================================================================
-  // STUDENT PAGES
-  // ===================================================================
 
-  async function pageStudentDashboard() {
-    try {
-      const student = await api("/student/me");
-      pageEl.innerHTML = `
-        <h2>Welcome, ${escapeHtml(student.name)}</h2>
-        <p class="muted">Registration number: ${escapeHtml(student.reg_no)}. Class: ${escapeHtml(student.class_name || "")}.</p>
-        ${resultHistoryBlockHtml(student, "/student/me/report-card")}
-      `;
-      wireReportDownloadButtons(pageEl);
-    } catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; }
-  }
+  const savedTheme =
+    localStorage.getItem(
+      "stlucys-theme"
+    ) || "light";
 
-  // Initial load
-  renderAll();
+
+  applyTheme(
+    savedTheme
+  );
+
+
+  themeButton.addEventListener(
+    "click",
+    () => {
+
+      const isOpen =
+        themeButton.getAttribute(
+          "aria-expanded"
+        ) === "true";
+
+
+      themeButton.setAttribute(
+        "aria-expanded",
+        String(!isOpen)
+      );
+
+
+      themeMenu.hidden =
+        isOpen;
+
+    }
+  );
+
+
+  themeOptions.forEach(
+    (option) => {
+
+      option.addEventListener(
+        "click",
+        () => {
+
+          applyTheme(
+            option.dataset.themeChoice
+          );
+
+
+          themeMenu.hidden =
+            true;
+
+
+          themeButton.setAttribute(
+            "aria-expanded",
+            "false"
+          );
+
+
+          themeButton.focus();
+
+        }
+      );
+
+    }
+  );
+
+
+  document.addEventListener(
+    "click",
+    (event) => {
+
+      if (
+        !event.target.closest(
+          ".theme-control"
+        )
+      ) {
+
+        themeMenu.hidden =
+          true;
+
+
+        themeButton.setAttribute(
+          "aria-expanded",
+          "false"
+        );
+
+      }
+
+    }
+  );
+
+
+  document.addEventListener(
+    "keydown",
+    (event) => {
+
+      if (
+        event.key === "Escape"
+      ) {
+
+        themeMenu.hidden =
+          true;
+
+
+        themeButton.setAttribute(
+          "aria-expanded",
+          "false"
+        );
+
+      }
+
+    }
+  );
+
+
+  /* -------------------------
+     INITIALIZE
+  ------------------------- */
+
+  refreshDropdowns();
+
 })();
+
 </script>
+
 </body>
 </html>
