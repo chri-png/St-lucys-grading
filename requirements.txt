@@ -5,5 +5,9 @@ passlib[bcrypt]==1.7.4
 bcrypt==4.0.1
 python-jose[cryptography]==3.3.0
 python-multipart==0.0.9
-psycopg2-binary==2.9.9
+reportlab==4.2.5
 
+# Only needed when deploying with a Postgres database (see README).
+# Uncomment this line before deploying to Render if using Postgres.
+# On Windows this can fail to install locally, so it's left out by default.
+# psycopg2-binary==2.9.9

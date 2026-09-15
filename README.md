@@ -56,7 +56,12 @@ instead:
 3. Add it as an environment variable on your web service named
    `DATABASE_URL` (the app already reads this automatically —
    see `database.py`).
-4. Redeploy. Your data will now persist properly across restarts.
+4. In `requirements.txt`, remove the `#` from the front of the
+   `psycopg2-binary` line so it actually installs (it's commented out
+   by default because it can fail to install locally on Windows, and
+   isn't needed for local SQLite testing).
+5. Push this change and redeploy. Your data will now persist properly
+   across restarts.
 
 Railway (https://railway.app) and Fly.io (https://fly.io) work in a very
 similar way if you'd rather use one of those instead of Render.

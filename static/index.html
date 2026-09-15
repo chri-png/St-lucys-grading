@@ -8,19 +8,13 @@
   :root {
     --ink: #1a1a1a; --paper: #fdfcf9; --accent: #1d4d3f;
     --accent-light: #e8f0ec; --border: #b8b2a4; --error: #7a2e2e; --error-bg: #fbeaea;
+    --sidebar-width: 260px;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--paper); color: var(--ink); font-family: Georgia, 'Times New Roman', serif; font-size: 18px; line-height: 1.5; }
-  header { background: var(--accent); color: var(--paper); padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; }
-  header .title h1 { margin: 0; font-size: 1.4rem; font-weight: normal; }
-  header .title p { margin: 0.25rem 0 0; font-size: 0.95rem; opacity: 0.9; }
-  header .bar-actions button { font-family: inherit; font-size: 0.9rem; padding: 0.5rem 0.9rem; background: var(--paper); color: var(--accent); border: none; border-radius: 4px; cursor: pointer; }
-  main { max-width: 760px; margin: 0 auto; padding: 1.25rem; }
-  #message { margin-bottom: 1rem; padding: 0.75rem 1rem; border-radius: 4px; display: none; }
-  #message.show { display: block; }
-  #message.success { background: var(--accent-light); border: 1px solid var(--accent); }
-  #message.error { background: var(--error-bg); border: 1px solid var(--error); color: var(--error); }
-  h2 { font-size: 1.3rem; border-bottom: 2px solid var(--accent-light); padding-bottom: 0.5rem; }
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--paper); color: var(--ink); font-family: Georgia, 'Times New Roman', serif; font-size: 17px; line-height: 1.5; }
+  h1, h2, h3 { font-family: Georgia, 'Times New Roman', serif; }
+  h2 { font-size: 1.3rem; border-bottom: 2px solid var(--accent-light); padding-bottom: 0.5rem; margin-top: 0; }
   h3 { font-size: 1.1rem; margin-top: 1.5rem; }
   fieldset { border: 1px solid var(--border); border-radius: 6px; padding: 1rem 1.1rem; margin: 0 0 1.25rem; }
   legend { font-weight: bold; padding: 0 0.4rem; }
@@ -28,7 +22,7 @@
   label.inline { display: inline-flex; align-items: center; gap: 0.4rem; font-weight: normal; margin: 0.4rem 0.8rem 0.4rem 0; }
   input[type=text], input[type=number], input[type=password], select, textarea { width: 100%; font-family: inherit; font-size: 1rem; padding: 0.55rem; border: 1px solid var(--border); border-radius: 4px; }
   textarea { min-height: 4.5rem; resize: vertical; }
-  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid #0b5fff; outline-offset: 2px; }
+  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible { outline: 3px solid #0b5fff; outline-offset: 2px; }
   button.primary { font-family: inherit; font-size: 1rem; padding: 0.65rem 1.2rem; background: var(--accent); color: var(--paper); border: none; border-radius: 4px; cursor: pointer; }
   button.primary:disabled { opacity: 0.6; cursor: default; }
   button.secondary { font-family: inherit; font-size: 1rem; padding: 0.65rem 1.2rem; background: var(--paper); color: var(--accent); border: 2px solid var(--accent); border-radius: 4px; cursor: pointer; }
@@ -39,10 +33,9 @@
   caption { text-align: left; font-weight: bold; margin-bottom: 0.4rem; }
   th, td { text-align: left; padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--border); }
   th { background: var(--accent-light); }
-  .role-tabs, .section-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
-  .role-tabs button, .section-tabs button { font-family: inherit; font-size: 1rem; padding: 0.6rem 1.1rem; border: 2px solid var(--accent); background: var(--paper); color: var(--accent); border-radius: 4px; cursor: pointer; }
-  .role-tabs button[aria-pressed="true"], .section-tabs button[aria-pressed="true"] { background: var(--accent); color: var(--paper); }
-  .section-tabs { border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+  .role-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .role-tabs button { font-family: inherit; font-size: 1rem; padding: 0.6rem 1.1rem; border: 2px solid var(--accent); background: var(--paper); color: var(--accent); border-radius: 4px; cursor: pointer; }
+  .role-tabs button[aria-pressed="true"] { background: var(--accent); color: var(--paper); }
   .term-block { border: 1px solid var(--border); border-radius: 6px; padding: 0.9rem 1rem; margin-top: 1rem; }
   .term-block h3 { margin-top: 0; }
   .muted { color: #555; font-size: 0.95rem; }
@@ -52,22 +45,119 @@
   .password-toggle:hover { background: var(--accent-light); }
   .result-row { border: 1px solid var(--border); border-radius: 6px; padding: 0.8rem; margin-top: 0.6rem; }
   .result-row .actions { margin-top: 0.6rem; }
+
+  /* ---- Login screen ---- */
+  .login-screen { max-width: 640px; margin: 0 auto; padding: 1.5rem; }
+  .login-header { padding: 1.25rem 0 1.5rem; }
+  .login-header h1 { margin: 0; font-size: 1.5rem; color: var(--accent); font-weight: normal; }
+  .login-header p { margin: 0.3rem 0 0; color: #555; }
+  #login-message { margin-bottom: 1rem; padding: 0.75rem 1rem; border-radius: 4px; display: none; }
+
+  /* ---- App shell ---- */
+  #app-shell { display: flex; min-height: 100vh; }
+  .sidebar { width: var(--sidebar-width); flex-shrink: 0; background: #fff; border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+  .sidebar-brand { padding: 1.25rem 1.1rem; border-bottom: 1px solid var(--border); }
+  .sidebar-brand strong { display: block; color: var(--accent); font-size: 1.05rem; }
+  .sidebar-brand span { font-size: 0.8rem; color: #666; }
+  #sidebar-nav { flex: 1; overflow-y: auto; padding: 0.6rem 0; }
+  .sidebar-footer { padding: 0.9rem 1.1rem; border-top: 1px solid var(--border); }
+  .sidebar-footer button { width: 100%; font-family: inherit; font-size: 0.95rem; padding: 0.6rem; background: var(--paper); color: var(--accent); border: 2px solid var(--accent); border-radius: 4px; cursor: pointer; }
+
+  .nav-top-btn, .nav-top-link {
+    width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+    padding: 0.7rem 1.1rem; background: none; border: none; border-left: 3px solid transparent;
+    text-align: left; font-family: inherit; font-size: 0.97rem; color: var(--ink); cursor: pointer; text-decoration: none;
+  }
+  .nav-top-btn:hover, .nav-top-link:hover { background: var(--accent-light); }
+  .nav-top-btn[aria-expanded="true"], .nav-top-link[aria-current="page"], .nav-top-btn.has-active-child {
+    border-left-color: var(--accent); background: var(--accent-light); font-weight: bold;
+  }
+  .nav-chevron { display: inline-block; transition: transform 0.15s; font-size: 0.8rem; }
+  .nav-top-btn[aria-expanded="true"] .nav-chevron { transform: rotate(90deg); }
+  .nav-children { list-style: none; margin: 0; padding: 0; }
+  .nav-children a {
+    display: block; padding: 0.55rem 1.1rem 0.55rem 2.3rem; color: var(--ink); text-decoration: none;
+    font-size: 0.9rem; border-left: 3px solid transparent;
+  }
+  .nav-children a:hover { background: var(--accent-light); }
+  .nav-children a[aria-current="page"] { border-left-color: var(--accent); font-weight: bold; background: var(--accent-light); }
+
+  .main-column { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 0.5rem; }
+  #breadcrumb { font-size: 0.92rem; color: #555; }
+  #breadcrumb a { color: var(--accent); text-decoration: none; }
+  #breadcrumb a:hover { text-decoration: underline; }
+  #breadcrumb .crumb-current { color: var(--ink); font-weight: bold; }
+  #breadcrumb .crumb-sep { margin: 0 0.4rem; color: #999; }
+  #topbar-user { font-size: 0.9rem; color: #555; }
+
+  #message { margin: 1rem 1.5rem 0; padding: 0.75rem 1rem; border-radius: 4px; display: none; }
+  #message.show, #login-message.show { display: block; }
+  #message.success, #login-message.success { background: var(--accent-light); border: 1px solid var(--accent); }
+  #message.error, #login-message.error { background: var(--error-bg); border: 1px solid var(--error); color: var(--error); }
+
+  #page-content { padding: 1.25rem 1.5rem 2.5rem; max-width: 900px; }
+  #page-content:focus { outline: none; }
+
+  .stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; margin: 1rem 0 1.75rem; }
+  .stat-card { border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.1rem; background: #fff; }
+  .stat-card .stat-value { font-size: 1.7rem; font-weight: bold; color: var(--accent); }
+  .stat-card .stat-label { font-size: 0.85rem; color: #555; margin-top: 0.2rem; }
+
+  .mobile-menu-toggle { display: none; }
+  .sidebar-overlay { display: none; }
+
+  @media (max-width: 900px) {
+    .sidebar {
+      position: fixed; top: 0; left: 0; height: 100vh; z-index: 40; overflow-y: auto;
+      transform: translateX(-100%); transition: transform 0.2s; box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+    }
+    .sidebar.open { transform: translateX(0); }
+    .mobile-menu-toggle {
+      display: flex; align-items: center; gap: 0.4rem; margin: 0.9rem 1.5rem 0; padding: 0.55rem 1rem;
+      background: var(--accent); color: var(--paper); border: none; border-radius: 4px; font-family: inherit; font-size: 0.95rem; cursor: pointer;
+    }
+    .sidebar-overlay.open { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 30; }
+    .main-column { width: 100%; }
+    #page-content { padding: 1rem; }
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="title">
+<div id="login-screen" class="login-screen">
+  <div class="login-header">
     <h1>St. Lucy's School for the Blind</h1>
-    <p id="header-subtitle">Student Grading System</p>
+    <p>Student Grading System</p>
   </div>
-  <div class="bar-actions" id="header-actions"></div>
-</header>
+  <div id="login-message" role="status" aria-live="polite"></div>
+  <div id="login-content"></div>
+</div>
 
-<main>
-  <div id="message" role="status" aria-live="polite"></div>
-  <div id="app"></div>
-</main>
+<div id="app-shell" hidden>
+  <button type="button" id="mobile-menu-toggle" class="mobile-menu-toggle" aria-expanded="false" aria-controls="sidebar">
+    <span aria-hidden="true">&#9776;</span> Menu
+  </button>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <aside id="sidebar" class="sidebar" aria-label="Main navigation">
+    <div class="sidebar-brand">
+      <strong>St. Lucy's</strong>
+      <span>School for the Blind</span>
+    </div>
+    <nav id="sidebar-nav" aria-label="Sections"></nav>
+    <div class="sidebar-footer">
+      <button type="button" id="btn-logout">Exit / Log out</button>
+    </div>
+  </aside>
+  <div class="main-column">
+    <header class="topbar">
+      <nav aria-label="Breadcrumb" id="breadcrumb"></nav>
+      <div id="topbar-user"></div>
+    </header>
+    <div id="message" role="status" aria-live="polite"></div>
+    <main id="page-content" tabindex="-1"></main>
+  </div>
+</div>
 
 <script>
 (function () {
@@ -77,19 +167,30 @@
 
   let session = null; // { token, role, displayName }
   let loginRole = "admin";
-  let adminTab = "classes"; // classes | teachers | students | lookup | settings
-  let teacherTab = "manage"; // manage | record | edit
+  let expandedNavIds = new Set();
 
-  const appEl = document.getElementById("app");
+  const loginScreenEl = document.getElementById("login-screen");
+  const loginContentEl = document.getElementById("login-content");
+  const loginMessageEl = document.getElementById("login-message");
+  const appShellEl = document.getElementById("app-shell");
+  const sidebarEl = document.getElementById("sidebar");
+  const sidebarNavEl = document.getElementById("sidebar-nav");
+  const sidebarOverlayEl = document.getElementById("sidebar-overlay");
+  const mobileToggleEl = document.getElementById("mobile-menu-toggle");
+  const breadcrumbEl = document.getElementById("breadcrumb");
+  const topbarUserEl = document.getElementById("topbar-user");
   const messageEl = document.getElementById("message");
-  const headerActionsEl = document.getElementById("header-actions");
-  const headerSubtitleEl = document.getElementById("header-subtitle");
+  const pageEl = document.getElementById("page-content");
 
   function announce(text, isError) {
-    messageEl.textContent = text;
-    messageEl.className = "show " + (isError ? "error" : "success");
+    const target = session ? messageEl : loginMessageEl;
+    target.textContent = text;
+    target.className = "show " + (isError ? "error" : "success");
   }
-  function clearMessage() { messageEl.className = ""; messageEl.textContent = ""; }
+  function clearMessage() {
+    messageEl.className = ""; messageEl.textContent = "";
+    loginMessageEl.className = ""; loginMessageEl.textContent = "";
+  }
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
   }
@@ -102,11 +203,6 @@
     if (score >= 26) return "Approaching Expectation (AE)";
     return "Below Expectation (BE)";
   }
-
-  // Each level maps to a representative score within its band, so a
-  // teacher can record a rubric-based judgement directly (rather than
-  // inventing a number) while the system still has a numeric value to
-  // sum and average behind the scenes.
   const CBE_LEVELS = [
     { code: "EE", score: 88, label: "Exceeding Expectation (EE) — 76 to 100" },
     { code: "ME", score: 63, label: "Meeting Expectation (ME) — 51 to 75" },
@@ -122,8 +218,6 @@
     const level = CBE_LEVELS.find((l) => l.code === code);
     return level ? level.score : 0;
   }
-  // For editing an existing entry: if its score matches a level's
-  // representative value exactly, default back to that level in the form.
   function levelForScore(score) {
     const match = CBE_LEVELS.find((l) => l.score === score);
     return match ? match.code : null;
@@ -145,7 +239,6 @@
   function wireScoreEntryToggle(container, idPrefix) {
     container.querySelectorAll(`input[name="${idPrefix}-mode"]`).forEach((radio) => {
       radio.addEventListener("change", () => {
-        const isLevel = radio.value === "level" && radio.checked;
         if (!radio.checked) return;
         document.getElementById(idPrefix + "-level-wrap").style.display = radio.value === "level" ? "" : "none";
         document.getElementById(idPrefix + "-score-wrap").style.display = radio.value === "number" ? "" : "none";
@@ -156,12 +249,12 @@
     const mode = container.querySelector(`input[name="${idPrefix}-mode"]:checked`).value;
     if (mode === "level") {
       const code = document.getElementById(idPrefix + "-level").value;
-      return { score: scoreForLevel(code), valid: true, levelCode: code };
+      return { score: scoreForLevel(code), valid: true };
     }
     const raw = document.getElementById(idPrefix + "-score").value;
     const score = Number(raw);
     const valid = raw !== "" && !isNaN(score) && score >= 0 && score <= 100;
-    return { score, valid, levelCode: null };
+    return { score, valid };
   }
 
   // ---- Password show/hide ----
@@ -186,17 +279,11 @@
     });
   }
 
-  // ---- Button loading state, used on all login buttons ----
   async function withLoadingButton(button, loadingText, fn) {
     const original = button.textContent;
     button.disabled = true;
     button.textContent = loadingText;
-    try {
-      await fn();
-    } finally {
-      button.disabled = false;
-      button.textContent = original;
-    }
+    try { await fn(); } finally { button.disabled = false; button.textContent = original; }
   }
 
   async function api(path, options = {}) {
@@ -207,46 +294,285 @@
     try { body = await res.json(); } catch (e) { /* no body */ }
     if (!res.ok) {
       const detail = (body && body.detail) ? body.detail : "Something went wrong. Please try again.";
-      if (res.status === 401 && session) { session = null; render(); }
+      if (res.status === 401 && session) { session = null; renderAll(); }
       throw new Error(detail);
     }
     return body;
   }
 
-  function renderHeaderActions() {
-    headerActionsEl.innerHTML = "";
-    if (session) {
-      const logoutBtn = document.createElement("button");
-      logoutBtn.type = "button";
-      logoutBtn.textContent = "Exit / Log out";
-      logoutBtn.addEventListener("click", () => { session = null; clearMessage(); render(); });
-      headerActionsEl.appendChild(logoutBtn);
+  async function downloadReportCard(path, filename, triggerBtn) {
+    const original = triggerBtn ? triggerBtn.textContent : null;
+    if (triggerBtn) { triggerBtn.disabled = true; triggerBtn.textContent = "Preparing PDF…"; }
+    try {
+      const headers = {};
+      if (session && session.token) headers["Authorization"] = "Bearer " + session.token;
+      const res = await fetch(API_BASE + path, { headers });
+      if (!res.ok) {
+        let detail = "Could not generate the report card.";
+        try { const body = await res.json(); if (body.detail) detail = body.detail; } catch (e) { /* ignore */ }
+        throw new Error(detail);
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) { announce(e.message, true); }
+    finally { if (triggerBtn) { triggerBtn.disabled = false; triggerBtn.textContent = original; } }
+  }
+
+  function aggregateByTermSubject(results) {
+    const termMap = {}; const termOrder = [];
+    results.forEach((r) => {
+      if (!termMap[r.term]) { termMap[r.term] = { subjects: {}, subjectOrder: [] }; termOrder.push(r.term); }
+      const t = termMap[r.term];
+      if (!t.subjects[r.subject]) { t.subjects[r.subject] = { total: 0, components: [] }; t.subjectOrder.push(r.subject); }
+      t.subjects[r.subject].total += r.score;
+      t.subjects[r.subject].components.push(r);
+    });
+    return { termMap, termOrder };
+  }
+
+  function renderResultHistoryHtml(student) {
+    if (!student.results.length) {
+      return "<p class='muted'>No results have been recorded for " + escapeHtml(student.name) + " yet.</p>";
+    }
+    const { termMap, termOrder } = aggregateByTermSubject(student.results);
+    const allSubjectTotals = [];
+    let html = `<h3>Full result history for ${escapeHtml(student.name)}</h3>`;
+    termOrder.forEach((term) => {
+      const t = termMap[term];
+      const subjectTotals = [];
+      let subjectBlocks = "";
+      t.subjectOrder.forEach((subject) => {
+        const s = t.subjects[subject];
+        subjectTotals.push(s.total); allSubjectTotals.push(s.total);
+        const componentLines = s.components.length > 1
+          ? "<ul>" + s.components.map((c) => `<li>${c.comment ? escapeHtml(c.comment) : "Entry"}: ${c.score}%</li>`).join("") + "</ul>"
+          : (s.components[0].comment ? `<p class="muted">${escapeHtml(s.components[0].comment)}</p>` : "");
+        subjectBlocks += `<div style="margin-top:0.7rem;">
+          <strong>${escapeHtml(subject)}: ${s.total}% — ${cbeFull(s.total)}</strong>
+          ${componentLines}
+        </div>`;
+      });
+      const termAvg = average(subjectTotals);
+      html += `<div class="term-block">
+        <h3>${escapeHtml(term)}</h3>
+        ${subjectBlocks}
+        <p style="margin-top:0.8rem;"><strong>Term average: ${termAvg.toFixed(1)}% — ${cbeFull(termAvg)}</strong></p>
+      </div>`;
+    });
+    const overallAvg = average(allSubjectTotals);
+    html += `<div class="term-block">
+      <h3>Overall, across all recorded terms</h3>
+      <p><strong>Overall average: ${overallAvg.toFixed(1)}% — ${cbeFull(overallAvg)}</strong></p>
+      <p class="muted">Based on ${student.results.length} recorded entr${student.results.length === 1 ? "y" : "ies"} across ${termOrder.length} term${termOrder.length === 1 ? "" : "s"}.</p>
+    </div>`;
+    return html;
+  }
+
+  function resultHistoryBlockHtml(student, downloadPath) {
+    const historyHtml = renderResultHistoryHtml(student);
+    if (!student.results.length) return historyHtml;
+    return `<div class="actions">
+        <button type="button" class="secondary" data-download-report="${escapeHtml(downloadPath)}" data-download-filename="${escapeHtml(student.reg_no)}_report_card.pdf">Download PDF report card</button>
+      </div>
+      ${historyHtml}`;
+  }
+  function wireReportDownloadButtons(container) {
+    container.querySelectorAll("[data-download-report]").forEach((btn) => {
+      btn.addEventListener("click", () => downloadReportCard(btn.dataset.downloadReport, btn.dataset.downloadFilename, btn));
+    });
+  }
+
+  // ===================================================================
+  // NAVIGATION CONFIG — only includes sections that have real, working
+  // functionality behind them. Kept deliberately mapped 1:1 to what the
+  // system actually does, rather than a generic template menu.
+  // ===================================================================
+  const NAV = {
+    admin: [
+      { id: "dashboard", label: "Dashboard", path: "admin/dashboard" },
+      { id: "classes", label: "Classes", path: "admin/classes" },
+      { id: "teachers", label: "Teachers", children: [
+          { path: "admin/teachers", label: "All Teachers" },
+          { path: "admin/teachers/reset-password", label: "Reset Password" },
+        ] },
+      { id: "learners", label: "Learners", path: "admin/learners" },
+      { id: "reports", label: "Reports", path: "admin/reports" },
+      { id: "settings", label: "Settings", path: "admin/settings" },
+    ],
+    teacher: [
+      { id: "dashboard", label: "Dashboard", path: "teacher/dashboard" },
+      { id: "classes", label: "My Classes", path: "teacher/classes" },
+      { id: "marks", label: "Assessment / Marks", children: [
+          { path: "teacher/marks/enter", label: "Enter Marks" },
+          { path: "teacher/marks/edit", label: "Edit Marks" },
+        ] },
+    ],
+    student: [
+      { id: "dashboard", label: "Dashboard", path: "student/dashboard" },
+    ],
+  };
+
+  const DEFAULT_PATH = { admin: "admin/dashboard", teacher: "teacher/dashboard", student: "student/dashboard" };
+
+  const ROUTES = {
+    admin: {
+      "admin/dashboard": { label: "Dashboard", parent: null, render: pageAdminDashboard },
+      "admin/classes": { label: "Classes", parent: null, render: pageAdminClasses },
+      "admin/teachers": { label: "All Teachers", parent: "Teachers", render: pageAdminTeachersAll },
+      "admin/teachers/reset-password": { label: "Reset Password", parent: "Teachers", render: pageAdminTeachersResetPassword },
+      "admin/learners": { label: "Learners", parent: null, render: pageAdminLearners },
+      "admin/reports": { label: "Reports", parent: null, render: pageAdminReports },
+      "admin/settings": { label: "Settings", parent: null, render: pageAdminSettings },
+    },
+    teacher: {
+      "teacher/dashboard": { label: "Dashboard", parent: null, render: pageTeacherDashboard },
+      "teacher/classes": { label: "My Classes", parent: null, render: pageTeacherClasses },
+      "teacher/marks/enter": { label: "Enter Marks", parent: "Assessment / Marks", render: pageTeacherMarksEnter },
+      "teacher/marks/edit": { label: "Edit Marks", parent: "Assessment / Marks", render: pageTeacherMarksEdit },
+    },
+    student: {
+      "student/dashboard": { label: "Dashboard", parent: null, render: pageStudentDashboard },
+    },
+  };
+
+  function currentPath() {
+    return (location.hash || "").replace(/^#\/?/, "") || null;
+  }
+
+  // ---- Sidebar ----
+  function renderSidebar(role, activePath) {
+    const items = NAV[role];
+    sidebarNavEl.innerHTML = "";
+    items.forEach((item) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "nav-item";
+
+      if (item.children) {
+        const activeChild = item.children.find((c) => c.path === activePath);
+        const isExpanded = !!activeChild || expandedNavIds.has(item.id);
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "nav-top-btn" + (activeChild ? " has-active-child" : "");
+        btn.setAttribute("aria-expanded", isExpanded ? "true" : "false");
+        btn.innerHTML = `<span>${escapeHtml(item.label)}</span><span class="nav-chevron" aria-hidden="true">&#9656;</span>`;
+        btn.addEventListener("click", () => {
+          if (expandedNavIds.has(item.id)) expandedNavIds.delete(item.id);
+          else expandedNavIds.add(item.id);
+          renderSidebar(role, activePath);
+        });
+        wrapper.appendChild(btn);
+
+        const list = document.createElement("ul");
+        list.className = "nav-children";
+        list.hidden = !isExpanded;
+        item.children.forEach((child) => {
+          const li = document.createElement("li");
+          const a = document.createElement("a");
+          a.href = "#/" + child.path;
+          a.textContent = child.label;
+          if (child.path === activePath) a.setAttribute("aria-current", "page");
+          a.addEventListener("click", closeMobileSidebar);
+          li.appendChild(a);
+          list.appendChild(li);
+        });
+        wrapper.appendChild(list);
+      } else {
+        const a = document.createElement("a");
+        a.href = "#/" + item.path;
+        a.className = "nav-top-link";
+        a.innerHTML = `<span>${escapeHtml(item.label)}</span>`;
+        if (item.path === activePath) a.setAttribute("aria-current", "page");
+        a.addEventListener("click", closeMobileSidebar);
+        wrapper.appendChild(a);
+      }
+
+      sidebarNavEl.appendChild(wrapper);
+    });
+  }
+
+  function closeMobileSidebar() {
+    sidebarEl.classList.remove("open");
+    sidebarOverlayEl.classList.remove("open");
+    mobileToggleEl.setAttribute("aria-expanded", "false");
+  }
+
+  // ---- Breadcrumb ----
+  function renderBreadcrumb(role, path) {
+    const route = ROUTES[role][path];
+    const parts = [];
+    const dashboardPath = DEFAULT_PATH[role];
+    if (path !== dashboardPath) {
+      parts.push(`<a href="#/${dashboardPath}">Dashboard</a>`);
+      parts.push(`<span class="crumb-sep" aria-hidden="true">&rsaquo;</span>`);
+    }
+    if (route.parent) {
+      parts.push(`<span>${escapeHtml(route.parent)}</span>`);
+      parts.push(`<span class="crumb-sep" aria-hidden="true">&rsaquo;</span>`);
+    }
+    parts.push(`<span class="crumb-current" aria-current="page">${escapeHtml(route.label)}</span>`);
+    breadcrumbEl.innerHTML = parts.join("");
+  }
+
+  // ---- Router ----
+  async function renderRoute() {
+    const role = session.role;
+    let path = currentPath();
+    if (!path || !ROUTES[role][path]) {
+      location.hash = "#/" + DEFAULT_PATH[role];
+      return; // hashchange will re-trigger renderRoute
+    }
+    renderSidebar(role, path);
+    renderBreadcrumb(role, path);
+    topbarUserEl.textContent = session.displayName + " (" + role.charAt(0).toUpperCase() + role.slice(1) + ")";
+    pageEl.innerHTML = "<p class='muted'>Loading…</p>";
+    try {
+      await ROUTES[role][path].render();
+    } catch (e) {
+      pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message || "Something went wrong.") + "</p>";
+    }
+    pageEl.focus();
+  }
+
+  window.addEventListener("hashchange", () => { if (session) renderRoute(); });
+
+  // ===================================================================
+  // Top-level render dispatcher
+  // ===================================================================
+  async function renderAll() {
+    if (!session) {
+      appShellEl.hidden = true;
+      loginScreenEl.hidden = false;
+      await renderLogin();
+    } else {
+      loginScreenEl.hidden = true;
+      appShellEl.hidden = false;
+      await renderRoute();
     }
   }
 
-  async function render() {
-    renderHeaderActions();
-    if (!session) {
-      headerSubtitleEl.textContent = "Student Grading System";
-      await renderLogin();
-    } else if (session.role === "admin") {
-      headerSubtitleEl.textContent = "Administrator dashboard";
-      await renderAdminDashboard();
-    } else if (session.role === "teacher") {
-      headerSubtitleEl.textContent = "Teacher dashboard — " + session.displayName;
-      await renderTeacherDashboard();
-    } else if (session.role === "student") {
-      headerSubtitleEl.textContent = "Student dashboard — " + session.displayName;
-      await renderStudentDashboard();
-    }
-  }
+  document.getElementById("btn-logout").addEventListener("click", () => {
+    session = null;
+    clearMessage();
+    location.hash = "";
+    renderAll();
+  });
+
+  mobileToggleEl.addEventListener("click", () => {
+    const isOpen = sidebarEl.classList.toggle("open");
+    sidebarOverlayEl.classList.toggle("open", isOpen);
+    mobileToggleEl.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  });
+  sidebarOverlayEl.addEventListener("click", closeMobileSidebar);
 
   // -----------------------------------------------------------------
   // LOGIN
   // -----------------------------------------------------------------
   async function renderLogin() {
-    appEl.innerHTML = `
-      <h2>Log in</h2>
+    loginContentEl.innerHTML = `
       <div class="role-tabs" role="tablist" aria-label="Choose how you want to log in">
         <button type="button" data-role="admin" aria-pressed="${loginRole==="admin"}">Administrator</button>
         <button type="button" data-role="teacher" aria-pressed="${loginRole==="teacher"}">Teacher</button>
@@ -254,8 +580,8 @@
       </div>
       <div id="login-form-area">Loading…</div>
     `;
-    appEl.querySelectorAll(".role-tabs button").forEach((btn) => {
-      btn.addEventListener("click", () => { loginRole = btn.dataset.role; clearMessage(); render(); });
+    loginContentEl.querySelectorAll(".role-tabs button").forEach((btn) => {
+      btn.addEventListener("click", () => { loginRole = btn.dataset.role; clearMessage(); renderAll(); });
     });
 
     const area = document.getElementById("login-form-area");
@@ -275,7 +601,7 @@
           const pw = document.getElementById("admin-password").value;
           const result = await api("/auth/admin/login", { method: "POST", body: JSON.stringify({ password: pw }) });
           session = { token: result.token, role: result.role, displayName: result.display_name };
-          clearMessage(); render();
+          clearMessage(); renderAll();
         } catch (e) { announce(e.message, true); }
       }));
     }
@@ -298,7 +624,7 @@
           const password = document.getElementById("teacher-password").value;
           const result = await api("/auth/teacher/login", { method: "POST", body: JSON.stringify({ username, password }) });
           session = { token: result.token, role: result.role, displayName: result.display_name };
-          clearMessage(); render();
+          clearMessage(); renderAll();
         } catch (e) { announce(e.message, true); }
       }));
     }
@@ -327,201 +653,159 @@
           const class_name = document.getElementById("student-class").value;
           const result = await api("/auth/student/login", { method: "POST", body: JSON.stringify({ reg_no, name, class_name }) });
           session = { token: result.token, role: result.role, displayName: result.display_name };
-          clearMessage(); render();
+          clearMessage(); renderAll();
         } catch (e) { announce(e.message, true); }
       }));
     }
   }
 
-  // -----------------------------------------------------------------
-  // ADMIN DASHBOARD
-  // -----------------------------------------------------------------
-  async function renderAdminDashboard() {
-    appEl.innerHTML = "<p class='muted'>Loading…</p>";
-    let classes, teachers, students;
-    try {
-      [classes, teachers, students] = await Promise.all([
-        api("/admin/classes"), api("/admin/teachers"), api("/admin/students")
-      ]);
-    } catch (e) { announce(e.message, true); return; }
+  // ===================================================================
+  // ADMIN PAGES
+  // ===================================================================
 
-    const tabsHtml = `
-      <div class="section-tabs" role="tablist" aria-label="Administrator sections">
-        <button type="button" data-tab="classes" aria-pressed="${adminTab==="classes"}">Classes</button>
-        <button type="button" data-tab="teachers" aria-pressed="${adminTab==="teachers"}">Teachers</button>
-        <button type="button" data-tab="students" aria-pressed="${adminTab==="students"}">Students</button>
-        <button type="button" data-tab="lookup" aria-pressed="${adminTab==="lookup"}">Look up results</button>
-        <button type="button" data-tab="settings" aria-pressed="${adminTab==="settings"}">Settings</button>
+  async function pageAdminDashboard() {
+    let stats;
+    try { stats = await api("/admin/dashboard-stats"); } catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
+    const avgText = stats.average_performance == null ? "No results yet" : stats.average_performance.toFixed(1) + "%";
+    pageEl.innerHTML = `
+      <h2>Dashboard</h2>
+      <div class="stat-cards">
+        <div class="stat-card"><div class="stat-value">${stats.total_classes}</div><div class="stat-label">Total Classes</div></div>
+        <div class="stat-card"><div class="stat-value">${stats.total_teachers}</div><div class="stat-label">Total Teachers</div></div>
+        <div class="stat-card"><div class="stat-value">${stats.total_students}</div><div class="stat-label">Total Learners</div></div>
+        <div class="stat-card"><div class="stat-value">${avgText}</div><div class="stat-label">School-wide Average Performance</div></div>
       </div>
+      <p class="muted">Use the menu on the left to manage classes, teachers, and learners, or to look up a learner's results.</p>
     `;
+  }
 
-    let sectionHtml = "";
-
-    if (adminTab === "classes") {
-      const classListHtml = classes.length
-        ? "<ul>" + classes.map((c) => `<li>${escapeHtml(c.name)} <button type="button" class="small secondary" data-remove-class="${escapeHtml(c.name)}">Remove</button></li>`).join("") + "</ul>"
-        : "<p class='muted'>No classes yet. Add one below.</p>";
-      sectionHtml = `
-        <fieldset>
-          <legend>Classes</legend>
-          ${classListHtml}
-          <label for="new-class-name">Add a new class</label>
-          <input type="text" id="new-class-name" placeholder="e.g. Grade 5">
-          <div class="actions"><button type="button" class="primary" id="btn-add-class">Add class</button></div>
-        </fieldset>`;
-    }
-
-    if (adminTab === "teachers") {
-      const teacherRows = teachers.map((t) => `<tr>
-          <td>${escapeHtml(t.name)}</td><td>${escapeHtml(t.username)}</td>
-          <td>${t.classes.map(escapeHtml).join(", ") || "None"}</td>
-        </tr>`).join("");
-      const classCheckboxes = classes.map((c) =>
-        `<label class="inline"><input type="checkbox" value="${escapeHtml(c.name)}" class="teacher-class-cb"> ${escapeHtml(c.name)}</label>`
-      ).join("");
-
-      sectionHtml = `
-        <fieldset>
-          <legend>Add a teacher</legend>
-          <label for="teacher-name">Teacher's full name</label>
-          <input type="text" id="teacher-name">
-          <label for="new-teacher-username">Username</label>
-          <input type="text" id="new-teacher-username" autocomplete="off">
-          ${passwordFieldHtml("new-teacher-password", "Password")}
-          <label>Classes this teacher can access</label>
-          ${classCheckboxes || "<p class='muted'>No classes available yet.</p>"}
-          <div class="actions"><button type="button" class="primary" id="btn-add-teacher">Add teacher</button></div>
-          ${teacherRows ? `<table><caption>Current teachers</caption>
-            <tr><th scope="col">Name</th><th scope="col">Username</th><th scope="col">Assigned classes</th></tr>${teacherRows}</table>`
-            : "<p class='muted'>No teachers added yet.</p>"}
-        </fieldset>
-
-        <fieldset>
-          <legend>Reassign a teacher's classes</legend>
-          <p class="muted">Forgot to give a teacher access to a class? Pick them below and update.</p>
-          <label for="reassign-teacher-select">Teacher</label>
-          <select id="reassign-teacher-select">
-            <option value="">Select a teacher</option>
-            ${teachers.map((t) => `<option value="${escapeHtml(t.username)}">${escapeHtml(t.name)} (${escapeHtml(t.username)})</option>`).join("")}
-          </select>
-          <div id="reassign-class-checkboxes">${
-            classes.length
-              ? classes.map((c) => `<label class="inline"><input type="checkbox" value="${escapeHtml(c.name)}" class="reassign-class-cb"> ${escapeHtml(c.name)}</label>`).join("")
-              : "<p class='muted'>No classes available yet.</p>"
-          }</div>
-          <div class="actions"><button type="button" class="primary" id="btn-reassign-classes">Update classes</button></div>
-        </fieldset>
-
-        <fieldset>
-          <legend>Reset a teacher's password</legend>
-          <p class="muted">Passwords can't be viewed for security reasons — only reset to something new.</p>
-          <label for="reset-pw-teacher-select">Teacher</label>
-          <select id="reset-pw-teacher-select">
-            <option value="">Select a teacher</option>
-            ${teachers.map((t) => `<option value="${escapeHtml(t.username)}">${escapeHtml(t.name)} (${escapeHtml(t.username)})</option>`).join("")}
-          </select>
-          ${passwordFieldHtml("reset-pw-new-password", "New password")}
-          <div class="actions"><button type="button" class="primary" id="btn-reset-teacher-password">Set new password</button></div>
-        </fieldset>`;
-    }
-
-    if (adminTab === "students") {
-      const studentRows = students.map((s) => `<tr>
-          <td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.reg_no)}</td>
-          <td>${escapeHtml(s.class_name || "Unassigned")}</td><td>${s.result_count}</td>
-        </tr>`).join("");
-      const classOptions = classes.map((c) => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join("");
-      sectionHtml = `
-        <fieldset>
-          <legend>Students</legend>
-          <label for="new-student-regno">Registration number</label>
-          <input type="text" id="new-student-regno" autocomplete="off">
-          <label for="new-student-name">Full name</label>
-          <input type="text" id="new-student-name">
-          <label for="new-student-class">Class</label>
-          <select id="new-student-class"><option value="">Select a class</option>${classOptions}</select>
-          <div class="actions"><button type="button" class="primary" id="btn-add-student">Enroll student</button></div>
-          ${studentRows ? `<table><caption>Currently enrolled students</caption>
-            <tr><th scope="col">Name</th><th scope="col">Registration number</th><th scope="col">Class</th><th scope="col">Recorded results</th></tr>${studentRows}</table>`
-            : "<p class='muted'>No students enrolled yet.</p>"}
-        </fieldset>`;
-    }
-
-    if (adminTab === "lookup") {
-      sectionHtml = `
-        <fieldset>
-          <legend>View any student's full results</legend>
-          <label for="admin-view-regno">Registration number</label>
-          <input type="text" id="admin-view-regno" autocomplete="off">
-          <div class="actions"><button type="button" class="secondary" id="btn-admin-view">Show results</button></div>
-          <div id="admin-view-output"></div>
-        </fieldset>`;
-    }
-
-    if (adminTab === "settings") {
-      sectionHtml = `
-        <fieldset>
-          <legend>Administrator settings</legend>
-          ${passwordFieldHtml("admin-new-password", "Change administrator password")}
-          <div class="actions"><button type="button" class="secondary" id="btn-change-admin-password">Update password</button></div>
-        </fieldset>`;
-    }
-
-    appEl.innerHTML = `<h2>Administrator dashboard</h2>${tabsHtml}<div id="admin-section">${sectionHtml}</div>`;
-    wirePasswordToggles(appEl);
-
-    appEl.querySelectorAll(".section-tabs button").forEach((btn) => {
-      btn.addEventListener("click", () => { adminTab = btn.dataset.tab; clearMessage(); render(); });
-    });
-
-    const addClassBtn = document.getElementById("btn-add-class");
-    if (addClassBtn) addClassBtn.addEventListener("click", async () => {
+  async function pageAdminClasses() {
+    let classes;
+    try { classes = await api("/admin/classes"); } catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
+    const classListHtml = classes.length
+      ? "<ul>" + classes.map((c) => `<li>${escapeHtml(c.name)} <button type="button" class="small secondary" data-remove-class="${escapeHtml(c.name)}">Remove</button></li>`).join("") + "</ul>"
+      : "<p class='muted'>No classes yet. Add one below.</p>";
+    pageEl.innerHTML = `
+      <h2>Classes</h2>
+      <fieldset>
+        <legend>Classes</legend>
+        ${classListHtml}
+        <label for="new-class-name">Add a new class</label>
+        <input type="text" id="new-class-name" placeholder="e.g. Grade 5">
+        <div class="actions"><button type="button" class="primary" id="btn-add-class">Add class</button></div>
+      </fieldset>
+    `;
+    document.getElementById("btn-add-class").addEventListener("click", async () => {
       const name = document.getElementById("new-class-name").value.trim();
       if (!name) { announce("Please enter a class name.", true); return; }
-      try { await api("/admin/classes", { method: "POST", body: JSON.stringify({ name }) }); announce("Class \"" + name + "\" added.", false); render(); }
+      try { await api("/admin/classes", { method: "POST", body: JSON.stringify({ name }) }); announce("Class \"" + name + "\" added.", false); pageAdminClasses(); }
       catch (e) { announce(e.message, true); }
     });
-    appEl.querySelectorAll("[data-remove-class]").forEach((btn) => {
+    pageEl.querySelectorAll("[data-remove-class]").forEach((btn) => {
       btn.addEventListener("click", async () => {
-        try { await api("/admin/classes/" + encodeURIComponent(btn.dataset.removeClass), { method: "DELETE" }); announce("Class removed.", false); render(); }
+        if (!window.confirm("Remove the class \"" + btn.dataset.removeClass + "\"? Students already in it keep the label until reassigned.")) return;
+        try { await api("/admin/classes/" + encodeURIComponent(btn.dataset.removeClass), { method: "DELETE" }); announce("Class removed.", false); pageAdminClasses(); }
         catch (e) { announce(e.message, true); }
       });
     });
+  }
 
-    const addTeacherBtn = document.getElementById("btn-add-teacher");
-    if (addTeacherBtn) addTeacherBtn.addEventListener("click", async () => {
+  async function pageAdminTeachersAll() {
+    let classes, teachers;
+    try { [classes, teachers] = await Promise.all([api("/admin/classes"), api("/admin/teachers")]); }
+    catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
+
+    const teacherRows = teachers.map((t) => `<tr>
+        <td>${escapeHtml(t.name)}</td><td>${escapeHtml(t.username)}</td>
+        <td>${t.classes.map(escapeHtml).join(", ") || "None"}</td>
+      </tr>`).join("");
+    const classCheckboxes = classes.map((c) =>
+      `<label class="inline"><input type="checkbox" value="${escapeHtml(c.name)}" class="teacher-class-cb"> ${escapeHtml(c.name)}</label>`
+    ).join("");
+
+    pageEl.innerHTML = `
+      <h2>All Teachers</h2>
+      <fieldset>
+        <legend>Add a teacher</legend>
+        <label for="teacher-name">Teacher's full name</label>
+        <input type="text" id="teacher-name">
+        <label for="new-teacher-username">Username</label>
+        <input type="text" id="new-teacher-username" autocomplete="off">
+        ${passwordFieldHtml("new-teacher-password", "Password")}
+        <label>Classes this teacher can access</label>
+        ${classCheckboxes || "<p class='muted'>No classes available yet.</p>"}
+        <div class="actions"><button type="button" class="primary" id="btn-add-teacher">Add teacher</button></div>
+        ${teacherRows ? `<table><caption>Current teachers</caption>
+          <tr><th scope="col">Name</th><th scope="col">Username</th><th scope="col">Assigned classes</th></tr>${teacherRows}</table>`
+          : "<p class='muted'>No teachers added yet.</p>"}
+      </fieldset>
+
+      <fieldset>
+        <legend>Reassign a teacher's classes</legend>
+        <p class="muted">Forgot to give a teacher access to a class? Pick them below and update.</p>
+        <label for="reassign-teacher-select">Teacher</label>
+        <select id="reassign-teacher-select">
+          <option value="">Select a teacher</option>
+          ${teachers.map((t) => `<option value="${escapeHtml(t.username)}">${escapeHtml(t.name)} (${escapeHtml(t.username)})</option>`).join("")}
+        </select>
+        <div id="reassign-class-checkboxes">${
+          classes.length
+            ? classes.map((c) => `<label class="inline"><input type="checkbox" value="${escapeHtml(c.name)}" class="reassign-class-cb"> ${escapeHtml(c.name)}</label>`).join("")
+            : "<p class='muted'>No classes available yet.</p>"
+        }</div>
+        <div class="actions"><button type="button" class="primary" id="btn-reassign-classes">Update classes</button></div>
+      </fieldset>
+    `;
+    wirePasswordToggles(pageEl);
+
+    document.getElementById("btn-add-teacher").addEventListener("click", async () => {
       const name = document.getElementById("teacher-name").value.trim();
       const username = document.getElementById("new-teacher-username").value.trim();
       const password = document.getElementById("new-teacher-password").value;
-      const assigned = Array.from(appEl.querySelectorAll(".teacher-class-cb:checked")).map((cb) => cb.value);
+      const assigned = Array.from(pageEl.querySelectorAll(".teacher-class-cb:checked")).map((cb) => cb.value);
       if (!name || !username || !password) { announce("Please fill in the teacher's name, username, and password.", true); return; }
       try {
         await api("/admin/teachers", { method: "POST", body: JSON.stringify({ name, username, password, classes: assigned }) });
-        announce("Teacher account created for " + name + ".", false); render();
+        announce("Teacher account created for " + name + ".", false); pageAdminTeachersAll();
       } catch (e) { announce(e.message, true); }
     });
 
     const reassignSelect = document.getElementById("reassign-teacher-select");
-    if (reassignSelect) {
-      reassignSelect.addEventListener("change", () => {
-        const username = reassignSelect.value;
-        const teacher = teachers.find((t) => t.username === username);
-        const currentClasses = teacher ? teacher.classes : [];
-        appEl.querySelectorAll(".reassign-class-cb").forEach((cb) => { cb.checked = currentClasses.includes(cb.value); });
-      });
-      document.getElementById("btn-reassign-classes").addEventListener("click", async () => {
-        const username = reassignSelect.value;
-        if (!username) { announce("Please choose a teacher first.", true); return; }
-        const selected = Array.from(appEl.querySelectorAll(".reassign-class-cb:checked")).map((cb) => cb.value);
-        try {
-          await api("/admin/teachers/" + encodeURIComponent(username) + "/classes", { method: "PUT", body: JSON.stringify({ classes: selected }) });
-          announce("Updated classes for that teacher.", false); render();
-        } catch (e) { announce(e.message, true); }
-      });
-    }
+    reassignSelect.addEventListener("change", () => {
+      const teacher = teachers.find((t) => t.username === reassignSelect.value);
+      const currentClasses = teacher ? teacher.classes : [];
+      pageEl.querySelectorAll(".reassign-class-cb").forEach((cb) => { cb.checked = currentClasses.includes(cb.value); });
+    });
+    document.getElementById("btn-reassign-classes").addEventListener("click", async () => {
+      const username = reassignSelect.value;
+      if (!username) { announce("Please choose a teacher first.", true); return; }
+      const selected = Array.from(pageEl.querySelectorAll(".reassign-class-cb:checked")).map((cb) => cb.value);
+      try {
+        await api("/admin/teachers/" + encodeURIComponent(username) + "/classes", { method: "PUT", body: JSON.stringify({ classes: selected }) });
+        announce("Updated classes for that teacher.", false); pageAdminTeachersAll();
+      } catch (e) { announce(e.message, true); }
+    });
+  }
 
-    const resetPwBtn = document.getElementById("btn-reset-teacher-password");
-    if (resetPwBtn) resetPwBtn.addEventListener("click", async () => {
+  async function pageAdminTeachersResetPassword() {
+    let teachers;
+    try { teachers = await api("/admin/teachers"); } catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
+    pageEl.innerHTML = `
+      <h2>Reset a Teacher's Password</h2>
+      <fieldset>
+        <legend>Reset password</legend>
+        <p class="muted">Passwords can't be viewed for security reasons — only reset to something new.</p>
+        <label for="reset-pw-teacher-select">Teacher</label>
+        <select id="reset-pw-teacher-select">
+          <option value="">Select a teacher</option>
+          ${teachers.map((t) => `<option value="${escapeHtml(t.username)}">${escapeHtml(t.name)} (${escapeHtml(t.username)})</option>`).join("")}
+        </select>
+        ${passwordFieldHtml("reset-pw-new-password", "New password")}
+        <div class="actions"><button type="button" class="primary" id="btn-reset-teacher-password">Set new password</button></div>
+      </fieldset>
+    `;
+    wirePasswordToggles(pageEl);
+    document.getElementById("btn-reset-teacher-password").addEventListener("click", async () => {
       const username = document.getElementById("reset-pw-teacher-select").value;
       const newPassword = document.getElementById("reset-pw-new-password").value;
       if (!username) { announce("Please choose a teacher first.", true); return; }
@@ -532,31 +816,80 @@
         document.getElementById("reset-pw-new-password").value = "";
       } catch (e) { announce(e.message, true); }
     });
+  }
 
-    const addStudentBtn = document.getElementById("btn-add-student");
-    if (addStudentBtn) addStudentBtn.addEventListener("click", async () => {
+  async function pageAdminLearners() {
+    let classes, students;
+    try { [classes, students] = await Promise.all([api("/admin/classes"), api("/admin/students")]); }
+    catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
+
+    const studentRows = students.map((s) => `<tr>
+        <td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.reg_no)}</td>
+        <td>${escapeHtml(s.class_name || "Unassigned")}</td><td>${s.result_count}</td>
+      </tr>`).join("");
+    const classOptions = classes.map((c) => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join("");
+
+    pageEl.innerHTML = `
+      <h2>Learners</h2>
+      <fieldset>
+        <legend>Enroll a learner</legend>
+        <label for="new-student-regno">Registration number</label>
+        <input type="text" id="new-student-regno" autocomplete="off">
+        <label for="new-student-name">Full name</label>
+        <input type="text" id="new-student-name">
+        <label for="new-student-class">Class</label>
+        <select id="new-student-class"><option value="">Select a class</option>${classOptions}</select>
+        <div class="actions"><button type="button" class="primary" id="btn-add-student">Enroll learner</button></div>
+        ${studentRows ? `<table><caption>Currently enrolled learners</caption>
+          <tr><th scope="col">Name</th><th scope="col">Registration number</th><th scope="col">Class</th><th scope="col">Recorded results</th></tr>${studentRows}</table>`
+          : "<p class='muted'>No learners enrolled yet.</p>"}
+      </fieldset>
+    `;
+    document.getElementById("btn-add-student").addEventListener("click", async () => {
       const reg_no = document.getElementById("new-student-regno").value.trim();
       const name = document.getElementById("new-student-name").value.trim();
       const class_name = document.getElementById("new-student-class").value;
       if (!reg_no || !name || !class_name) { announce("Please fill in registration number, name, and class.", true); return; }
       try {
         await api("/admin/students", { method: "POST", body: JSON.stringify({ reg_no, name, class_name }) });
-        announce(name + " has been enrolled in " + class_name + ".", false); render();
+        announce(name + " has been enrolled in " + class_name + ".", false); pageAdminLearners();
       } catch (e) { announce(e.message, true); }
     });
+  }
 
-    const adminViewBtn = document.getElementById("btn-admin-view");
-    if (adminViewBtn) adminViewBtn.addEventListener("click", async () => {
+  async function pageAdminReports() {
+    pageEl.innerHTML = `
+      <h2>Reports</h2>
+      <fieldset>
+        <legend>Look up a learner's full results</legend>
+        <label for="admin-view-regno">Registration number</label>
+        <input type="text" id="admin-view-regno" autocomplete="off">
+        <div class="actions"><button type="button" class="secondary" id="btn-admin-view">Show results</button></div>
+        <div id="admin-view-output"></div>
+      </fieldset>
+    `;
+    document.getElementById("btn-admin-view").addEventListener("click", async () => {
       const reg_no = document.getElementById("admin-view-regno").value.trim();
       const output = document.getElementById("admin-view-output");
       try {
         const student = await api("/admin/students/" + encodeURIComponent(reg_no) + "/results");
-        output.innerHTML = renderResultHistoryHtml(student);
+        output.innerHTML = resultHistoryBlockHtml(student, "/admin/students/" + encodeURIComponent(reg_no) + "/report-card");
+        wireReportDownloadButtons(output);
       } catch (e) { output.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; }
     });
+  }
 
-    const changePwBtn = document.getElementById("btn-change-admin-password");
-    if (changePwBtn) changePwBtn.addEventListener("click", async () => {
+  async function pageAdminSettings() {
+    pageEl.innerHTML = `
+      <h2>Settings</h2>
+      <fieldset>
+        <legend>Administrator password</legend>
+        ${passwordFieldHtml("admin-new-password", "Change administrator password")}
+        <div class="actions"><button type="button" class="secondary" id="btn-change-admin-password">Update password</button></div>
+      </fieldset>
+    `;
+    wirePasswordToggles(pageEl);
+    document.getElementById("btn-change-admin-password").addEventListener("click", async () => {
       const newPw = document.getElementById("admin-new-password").value;
       if (!newPw) { announce("Please enter a new password.", true); return; }
       try {
@@ -567,113 +900,73 @@
     });
   }
 
-  // -----------------------------------------------------------------
-  // TEACHER DASHBOARD
-  // -----------------------------------------------------------------
-  async function renderTeacherDashboard() {
-    appEl.innerHTML = "<p class='muted'>Loading…</p>";
-    let me;
-    try { me = await api("/teacher/me"); } catch (e) { announce(e.message, true); return; }
-    const myClasses = me.classes;
-    const classOptions = myClasses.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+  // ===================================================================
+  // TEACHER PAGES
+  // ===================================================================
 
-    const tabsHtml = `
-      <div class="section-tabs" role="tablist" aria-label="Teacher sections">
-        <button type="button" data-tab="manage" aria-pressed="${teacherTab==="manage"}">My classes &amp; students</button>
-        <button type="button" data-tab="record" aria-pressed="${teacherTab==="record"}">Record a result</button>
-        <button type="button" data-tab="edit" aria-pressed="${teacherTab==="edit"}">Edit results</button>
-      </div>`;
-
-    let sectionHtml = "";
-
-    if (teacherTab === "manage") {
-      sectionHtml = `
-        <fieldset>
-          <legend>Enroll or move a student into your class</legend>
-          <label for="t-student-regno">Registration number</label>
-          <input type="text" id="t-student-regno" autocomplete="off">
-          <label for="t-student-name">Full name (only needed for a new student)</label>
-          <input type="text" id="t-student-name">
-          <label for="t-student-class">Class</label>
-          <select id="t-student-class"><option value="">Select a class</option>${classOptions}</select>
-          <div class="actions"><button type="button" class="primary" id="btn-t-set-class">Save</button></div>
-        </fieldset>
-
-        <fieldset>
-          <legend>View a class roster</legend>
-          <label for="t-view-class">Class</label>
-          <select id="t-view-class"><option value="">Select a class</option>${classOptions}</select>
-          <div id="t-class-roster"></div>
-          <div id="t-student-history"></div>
-        </fieldset>`;
-    }
-
-    if (teacherTab === "record") {
-      sectionHtml = `
-        <fieldset>
-          <legend>Record a result</legend>
-          <label for="t-grade-class">Class</label>
-          <select id="t-grade-class"><option value="">Select a class</option>${classOptions}</select>
-          <label for="t-grade-student">Student</label>
-          <select id="t-grade-student"><option value="">Select a class first</option></select>
-          <label for="t-grade-term">Term or period (e.g. Term 1 2026)</label>
-          <input type="text" id="t-grade-term">
-          <label for="t-grade-subject">Subject</label>
-          <input type="text" id="t-grade-subject">
-          ${scoreEntryFieldsHtml("t-grade", "level")}
-          <label for="t-grade-comment">Comment / rubric note (optional) — e.g. "CAT 1", "Group work", or feedback on what the level was based on</label>
-          <textarea id="t-grade-comment"></textarea>
-          <p class="muted">If you enter more than one result for the same student, subject, and term, they will be added together as the total for that subject.</p>
-          <div class="actions"><button type="button" class="primary" id="btn-t-add-grade">Record result</button></div>
-        </fieldset>`;
-    }
-
-    if (teacherTab === "edit") {
-      sectionHtml = `
-        <fieldset>
-          <legend>Edit or remove a recorded result</legend>
-          <label for="t-edit-class">Class</label>
-          <select id="t-edit-class"><option value="">Select a class</option>${classOptions}</select>
-          <label for="t-edit-student">Student</label>
-          <select id="t-edit-student"><option value="">Select a class first</option></select>
-          <div class="actions"><button type="button" class="secondary" id="btn-t-load-results">Load results</button></div>
-          <div id="t-edit-results-list"></div>
-        </fieldset>`;
-    }
-
-    appEl.innerHTML = `
+  async function pageTeacherDashboard() {
+    let me, stats;
+    try { [me, stats] = await Promise.all([api("/teacher/me"), api("/teacher/dashboard-stats")]); }
+    catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
+    const avgText = stats.average_performance == null ? "No results yet" : stats.average_performance.toFixed(1) + "%";
+    pageEl.innerHTML = `
       <h2>Welcome, ${escapeHtml(me.name)}</h2>
-      <p class="muted">You have access to: ${myClasses.length ? myClasses.map(escapeHtml).join(", ") : "no classes yet. Ask an administrator to assign you one."}</p>
-      ${tabsHtml}
-      <div id="teacher-section">${sectionHtml}</div>
+      <div class="stat-cards">
+        <div class="stat-card"><div class="stat-value">${stats.total_classes}</div><div class="stat-label">My Classes</div></div>
+        <div class="stat-card"><div class="stat-value">${stats.total_students}</div><div class="stat-label">My Learners</div></div>
+        <div class="stat-card"><div class="stat-value">${avgText}</div><div class="stat-label">Average Performance</div></div>
+      </div>
+      <p class="muted">You have access to: ${me.classes.length ? me.classes.map(escapeHtml).join(", ") : "no classes yet — ask an administrator to assign you one."}</p>
+    `;
+  }
+
+  async function pageTeacherClasses() {
+    let me;
+    try { me = await api("/teacher/me"); } catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
+    const classOptions = me.classes.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+
+    pageEl.innerHTML = `
+      <h2>My Classes</h2>
+      <fieldset>
+        <legend>Enroll or move a learner into your class</legend>
+        <label for="t-student-regno">Registration number</label>
+        <input type="text" id="t-student-regno" autocomplete="off">
+        <label for="t-student-name">Full name (only needed for a new learner)</label>
+        <input type="text" id="t-student-name">
+        <label for="t-student-class">Class</label>
+        <select id="t-student-class"><option value="">Select a class</option>${classOptions}</select>
+        <div class="actions"><button type="button" class="primary" id="btn-t-set-class">Save</button></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>View a class roster</legend>
+        <label for="t-view-class">Class</label>
+        <select id="t-view-class"><option value="">Select a class</option>${classOptions}</select>
+        <div id="t-class-roster"></div>
+        <div id="t-student-history"></div>
+      </fieldset>
     `;
 
-    appEl.querySelectorAll(".section-tabs button").forEach((btn) => {
-      btn.addEventListener("click", () => { teacherTab = btn.dataset.tab; clearMessage(); render(); });
-    });
-    wireScoreEntryToggle(appEl, "t-grade");
-
-    const setClassBtn = document.getElementById("btn-t-set-class");
-    if (setClassBtn) setClassBtn.addEventListener("click", async () => {
+    document.getElementById("btn-t-set-class").addEventListener("click", async () => {
       const reg_no = document.getElementById("t-student-regno").value.trim();
       const name = document.getElementById("t-student-name").value.trim();
       const class_name = document.getElementById("t-student-class").value;
       if (!reg_no || !class_name) { announce("Please enter a registration number and choose a class.", true); return; }
       try {
         await api("/teacher/students", { method: "POST", body: JSON.stringify({ reg_no, name: name || null, class_name }) });
-        announce("Saved.", false); render();
+        announce("Saved.", false); pageTeacherClasses();
       } catch (e) { announce(e.message, true); }
     });
 
     const viewClassSelect = document.getElementById("t-view-class");
-    if (viewClassSelect) viewClassSelect.addEventListener("change", async () => {
+    viewClassSelect.addEventListener("change", async () => {
       const className = viewClassSelect.value;
       const rosterEl = document.getElementById("t-class-roster");
       document.getElementById("t-student-history").innerHTML = "";
       if (!className) { rosterEl.innerHTML = ""; return; }
       try {
         const roster = await api("/teacher/classes/" + encodeURIComponent(className) + "/students");
-        if (!roster.length) { rosterEl.innerHTML = "<p class='muted'>No students in this class yet.</p>"; return; }
+        if (!roster.length) { rosterEl.innerHTML = "<p class='muted'>No learners in this class yet.</p>"; return; }
         const rows = roster.map((s) => `<tr>
           <td>${escapeHtml(s.name)}</td><td>${escapeHtml(s.reg_no)}</td><td>${s.result_count}</td>
           <td>
@@ -686,8 +979,11 @@
         rosterEl.querySelectorAll("[data-show-history]").forEach((btn) => {
           btn.addEventListener("click", async () => {
             try {
-              const student = await api("/teacher/students/" + encodeURIComponent(btn.dataset.showHistory) + "/results");
-              document.getElementById("t-student-history").innerHTML = renderResultHistoryHtml(student);
+              const regNo = btn.dataset.showHistory;
+              const student = await api("/teacher/students/" + encodeURIComponent(regNo) + "/results");
+              const historyEl = document.getElementById("t-student-history");
+              historyEl.innerHTML = resultHistoryBlockHtml(student, "/teacher/students/" + encodeURIComponent(regNo) + "/report-card");
+              wireReportDownloadButtons(historyEl);
             } catch (e) { announce(e.message, true); }
           });
         });
@@ -695,8 +991,7 @@
           btn.addEventListener("click", async () => {
             const regNo = btn.dataset.removeStudent;
             const studentName = btn.dataset.studentName;
-            const confirmed = window.confirm("Remove " + studentName + " from " + className + "? Their result history is kept, but they'll no longer show in this class until reassigned.");
-            if (!confirmed) return;
+            if (!window.confirm("Remove " + studentName + " from " + className + "? Their result history is kept, but they'll no longer show in this class until reassigned.")) return;
             try {
               await api("/teacher/students/" + encodeURIComponent(regNo) + "/class", { method: "DELETE" });
               announce(studentName + " has been removed from " + className + ".", false);
@@ -706,28 +1001,54 @@
         });
       } catch (e) { announce(e.message, true); }
     });
+  }
+
+  async function pageTeacherMarksEnter() {
+    let me;
+    try { me = await api("/teacher/me"); } catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
+    const classOptions = me.classes.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+
+    pageEl.innerHTML = `
+      <h2>Enter Marks</h2>
+      <fieldset>
+        <legend>Record a result</legend>
+        <label for="t-grade-class">Class</label>
+        <select id="t-grade-class"><option value="">Select a class</option>${classOptions}</select>
+        <label for="t-grade-student">Learner</label>
+        <select id="t-grade-student"><option value="">Select a class first</option></select>
+        <label for="t-grade-term">Term or period (e.g. Term 1 2026)</label>
+        <input type="text" id="t-grade-term">
+        <label for="t-grade-subject">Subject</label>
+        <input type="text" id="t-grade-subject">
+        ${scoreEntryFieldsHtml("t-grade", "level")}
+        <label for="t-grade-comment">Comment / rubric note (optional) — e.g. "CAT 1", "Group work", or feedback on what the level was based on</label>
+        <textarea id="t-grade-comment"></textarea>
+        <p class="muted">If you enter more than one result for the same learner, subject, and term, they will be added together as the total for that subject.</p>
+        <div class="actions"><button type="button" class="primary" id="btn-t-add-grade">Record result</button></div>
+      </fieldset>
+    `;
+    wireScoreEntryToggle(pageEl, "t-grade");
 
     const gradeClassSelect = document.getElementById("t-grade-class");
     const gradeStudentSelect = document.getElementById("t-grade-student");
-    if (gradeClassSelect) gradeClassSelect.addEventListener("change", async () => {
+    gradeClassSelect.addEventListener("change", async () => {
       const className = gradeClassSelect.value;
       if (!className) { gradeStudentSelect.innerHTML = "<option value=''>Select a class first</option>"; return; }
       try {
         const roster = await api("/teacher/classes/" + encodeURIComponent(className) + "/students");
         gradeStudentSelect.innerHTML = roster.length
           ? roster.map((s) => `<option value="${escapeHtml(s.reg_no)}">${escapeHtml(s.name)} (${escapeHtml(s.reg_no)})</option>`).join("")
-          : "<option value=''>No students in this class</option>";
+          : "<option value=''>No learners in this class</option>";
       } catch (e) { announce(e.message, true); }
     });
 
-    const addGradeBtn = document.getElementById("btn-t-add-grade");
-    if (addGradeBtn) addGradeBtn.addEventListener("click", async () => {
+    document.getElementById("btn-t-add-grade").addEventListener("click", async () => {
       const reg_no = gradeStudentSelect.value;
       const term = document.getElementById("t-grade-term").value.trim();
       const subject = document.getElementById("t-grade-subject").value.trim();
       const comment = document.getElementById("t-grade-comment").value.trim();
-      const entry = readScoreEntry(appEl, "t-grade");
-      if (!reg_no) { announce("Please choose a class and a student.", true); return; }
+      const entry = readScoreEntry(pageEl, "t-grade");
+      if (!reg_no) { announce("Please choose a class and a learner.", true); return; }
       if (!term) { announce("Please enter a term or period.", true); return; }
       if (!subject) { announce("Please enter a subject.", true); return; }
       if (!entry.valid) { announce("Please enter a valid score between 0 and 100.", true); return; }
@@ -739,25 +1060,43 @@
         document.getElementById("t-grade-comment").value = "";
       } catch (e) { announce(e.message, true); }
     });
+  }
+
+  async function pageTeacherMarksEdit() {
+    let me;
+    try { me = await api("/teacher/me"); } catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
+    const classOptions = me.classes.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+
+    pageEl.innerHTML = `
+      <h2>Edit Marks</h2>
+      <fieldset>
+        <legend>Edit or remove a recorded result</legend>
+        <label for="t-edit-class">Class</label>
+        <select id="t-edit-class"><option value="">Select a class</option>${classOptions}</select>
+        <label for="t-edit-student">Learner</label>
+        <select id="t-edit-student"><option value="">Select a class first</option></select>
+        <div class="actions"><button type="button" class="secondary" id="btn-t-load-results">Load results</button></div>
+        <div id="t-edit-results-list"></div>
+      </fieldset>
+    `;
 
     const editClassSelect = document.getElementById("t-edit-class");
     const editStudentSelect = document.getElementById("t-edit-student");
-    if (editClassSelect) editClassSelect.addEventListener("change", async () => {
+    editClassSelect.addEventListener("change", async () => {
       const className = editClassSelect.value;
       if (!className) { editStudentSelect.innerHTML = "<option value=''>Select a class first</option>"; return; }
       try {
         const roster = await api("/teacher/classes/" + encodeURIComponent(className) + "/students");
         editStudentSelect.innerHTML = roster.length
           ? roster.map((s) => `<option value="${escapeHtml(s.reg_no)}">${escapeHtml(s.name)} (${escapeHtml(s.reg_no)})</option>`).join("")
-          : "<option value=''>No students in this class</option>";
+          : "<option value=''>No learners in this class</option>";
       } catch (e) { announce(e.message, true); }
     });
 
-    const loadResultsBtn = document.getElementById("btn-t-load-results");
-    if (loadResultsBtn) loadResultsBtn.addEventListener("click", async () => {
+    document.getElementById("btn-t-load-results").addEventListener("click", async () => {
       const reg_no = editStudentSelect.value;
       const listEl = document.getElementById("t-edit-results-list");
-      if (!reg_no) { announce("Please choose a class and a student.", true); return; }
+      if (!reg_no) { announce("Please choose a class and a learner.", true); return; }
       try {
         const student = await api("/teacher/students/" + encodeURIComponent(reg_no) + "/results");
         renderEditableResultsList(listEl, student);
@@ -785,8 +1124,7 @@
 
     container.querySelectorAll("[data-delete-result]").forEach((btn) => {
       btn.addEventListener("click", async () => {
-        const confirmed = window.confirm("Delete this result? This cannot be undone.");
-        if (!confirmed) return;
+        if (!window.confirm("Delete this result? This cannot be undone.")) return;
         try {
           await api("/teacher/results/" + btn.dataset.deleteResult, { method: "DELETE" });
           announce("Result deleted.", false);
@@ -816,20 +1154,16 @@
             <button type="button" class="small secondary" data-cancel-edit>Cancel</button>
           </div>
         `;
-        if (defaultMode === "level") {
-          document.getElementById(idPrefix + "-level").value = levelForScore(r.score);
-        } else {
-          document.getElementById(idPrefix + "-score").value = r.score;
-        }
+        if (defaultMode === "level") document.getElementById(idPrefix + "-level").value = levelForScore(r.score);
+        else document.getElementById(idPrefix + "-score").value = r.score;
         wireScoreEntryToggle(row, idPrefix);
+
         row.querySelector("[data-save-result]").addEventListener("click", async () => {
           const term = row.querySelector(".edit-term").value.trim();
           const subject = row.querySelector(".edit-subject").value.trim();
           const comment = row.querySelector(".edit-comment").value.trim();
           const entry = readScoreEntry(row, idPrefix);
-          if (!term || !subject || !entry.valid) {
-            announce("Please fill in a valid term, subject, and score between 0 and 100.", true); return;
-          }
+          if (!term || !subject || !entry.valid) { announce("Please fill in a valid term, subject, and score between 0 and 100.", true); return; }
           try {
             await api("/teacher/results/" + resultId, { method: "PUT", body: JSON.stringify({ term, subject, score: entry.score, comment: comment || null }) });
             announce("Result updated.", false);
@@ -837,87 +1171,29 @@
             renderEditableResultsList(container, updated);
           } catch (e) { announce(e.message, true); }
         });
-        row.querySelector("[data-cancel-edit]").addEventListener("click", () => {
-          renderEditableResultsList(container, student);
-        });
+        row.querySelector("[data-cancel-edit]").addEventListener("click", () => renderEditableResultsList(container, student));
       });
     });
   }
 
-  // -----------------------------------------------------------------
-  // STUDENT DASHBOARD
-  // -----------------------------------------------------------------
-  async function renderStudentDashboard() {
-    appEl.innerHTML = "<p class='muted'>Loading…</p>";
+  // ===================================================================
+  // STUDENT PAGES
+  // ===================================================================
+
+  async function pageStudentDashboard() {
     try {
       const student = await api("/student/me");
-      appEl.innerHTML = `
+      pageEl.innerHTML = `
         <h2>Welcome, ${escapeHtml(student.name)}</h2>
         <p class="muted">Registration number: ${escapeHtml(student.reg_no)}. Class: ${escapeHtml(student.class_name || "")}.</p>
-        ${renderResultHistoryHtml(student)}
+        ${resultHistoryBlockHtml(student, "/student/me/report-card")}
       `;
-    } catch (e) { announce(e.message, true); }
+      wireReportDownloadButtons(pageEl);
+    } catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; }
   }
 
-  // -----------------------------------------------------------------
-  // Shared: aggregate raw result entries by term + subject (summed),
-  // then render full history with CBE-style grading.
-  // -----------------------------------------------------------------
-  function aggregateByTermSubject(results) {
-    const termMap = {};
-    const termOrder = [];
-    results.forEach((r) => {
-      if (!termMap[r.term]) { termMap[r.term] = { subjects: {}, subjectOrder: [] }; termOrder.push(r.term); }
-      const t = termMap[r.term];
-      if (!t.subjects[r.subject]) { t.subjects[r.subject] = { total: 0, components: [] }; t.subjectOrder.push(r.subject); }
-      t.subjects[r.subject].total += r.score;
-      t.subjects[r.subject].components.push(r);
-    });
-    return { termMap, termOrder };
-  }
-
-  function renderResultHistoryHtml(student) {
-    if (!student.results.length) {
-      return "<p class='muted'>No results have been recorded for " + escapeHtml(student.name) + " yet.</p>";
-    }
-    const { termMap, termOrder } = aggregateByTermSubject(student.results);
-    const allSubjectTotals = [];
-    let html = `<h3>Full result history for ${escapeHtml(student.name)}</h3>`;
-
-    termOrder.forEach((term) => {
-      const t = termMap[term];
-      const subjectTotals = [];
-      let subjectBlocks = "";
-      t.subjectOrder.forEach((subject) => {
-        const s = t.subjects[subject];
-        subjectTotals.push(s.total);
-        allSubjectTotals.push(s.total);
-        const componentLines = s.components.length > 1
-          ? "<ul>" + s.components.map((c) => `<li>${c.comment ? escapeHtml(c.comment) : "Entry"}: ${c.score}%</li>`).join("") + "</ul>"
-          : (s.components[0].comment ? `<p class="muted">${escapeHtml(s.components[0].comment)}</p>` : "");
-        subjectBlocks += `<div style="margin-top:0.7rem;">
-          <strong>${escapeHtml(subject)}: ${s.total}% — ${cbeFull(s.total)}</strong>
-          ${componentLines}
-        </div>`;
-      });
-      const termAvg = average(subjectTotals);
-      html += `<div class="term-block">
-        <h3>${escapeHtml(term)}</h3>
-        ${subjectBlocks}
-        <p style="margin-top:0.8rem;"><strong>Term average: ${termAvg.toFixed(1)}% — ${cbeFull(termAvg)}</strong></p>
-      </div>`;
-    });
-
-    const overallAvg = average(allSubjectTotals);
-    html += `<div class="term-block">
-      <h3>Overall, across all recorded terms</h3>
-      <p><strong>Overall average: ${overallAvg.toFixed(1)}% — ${cbeFull(overallAvg)}</strong></p>
-      <p class="muted">Based on ${student.results.length} recorded entr${student.results.length === 1 ? "y" : "ies"} across ${termOrder.length} term${termOrder.length === 1 ? "" : "s"}.</p>
-    </div>`;
-    return html;
-  }
-
-  render();
+  // Initial load
+  renderAll();
 })();
 </script>
 </body>

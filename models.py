@@ -60,5 +60,6 @@ class Result(Base):
     term = Column(String, nullable=False)
     subject = Column(String, nullable=False)
     score = Column(Float, nullable=False)
+    comment = Column(String, nullable=True)
 
     student = relationship("Student", back_populates="results")

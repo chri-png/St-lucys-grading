@@ -81,12 +81,22 @@ class ResultCreateRequest(BaseModel):
     term: str
     subject: str
     score: float = Field(ge=0, le=100)
+    comment: Optional[str] = None
+
+
+class ResultUpdateRequest(BaseModel):
+    term: str
+    subject: str
+    score: float = Field(ge=0, le=100)
+    comment: Optional[str] = None
 
 
 class ResultItem(BaseModel):
+    id: int
     term: str
     subject: str
     score: float
+    comment: Optional[str] = None
 
 
 class StudentResultsResponse(BaseModel):
