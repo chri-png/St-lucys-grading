@@ -465,6 +465,21 @@
     });
   }
 
+  function renderRankingTableHtml(ranking, className, term) {
+    const scopeLabel = term ? escapeHtml(term) : "all recorded terms (overall)";
+    if (!ranking.length) {
+      return `<p class="muted">No learners in ${escapeHtml(className)} have recorded results for ${scopeLabel} yet.</p>`;
+    }
+    const rows = ranking.map((e) => `<tr>
+      <td>${e.rank}</td><td>${escapeHtml(e.name)}</td><td>${escapeHtml(e.reg_no)}</td>
+      <td>${e.average.toFixed(1)}%</td><td>${escapeHtml(cbeFull(e.average))}</td>
+    </tr>`).join("");
+    return `<table><caption>${escapeHtml(className)} ranking — ${scopeLabel}</caption>
+      <tr><th scope="col">Position</th><th scope="col">Name</th><th scope="col">Registration number</th><th scope="col">Average</th><th scope="col">Level</th></tr>
+      ${rows}
+    </table>`;
+  }
+
   // ===================================================================
   // NAVIGATION CONFIG — only includes sections that have real, working
   // functionality behind them. Kept deliberately mapped 1:1 to what the
@@ -474,10 +489,7 @@
     admin: [
       { id: "dashboard", label: "Dashboard", path: "admin/dashboard" },
       { id: "classes", label: "Classes", path: "admin/classes" },
-      { id: "teachers", label: "Teachers", children: [
-          { path: "admin/teachers", label: "All Teachers" },
-          { path: "admin/teachers/reset-password", label: "Reset Password" },
-        ] },
+      { id: "teachers", label: "Teachers", path: "admin/teachers" },
       { id: "learners", label: "Learners", path: "admin/learners" },
       { id: "reports", label: "Reports", path: "admin/reports" },
       { id: "settings", label: "Settings", path: "admin/settings" },
@@ -501,8 +513,7 @@
     admin: {
       "admin/dashboard": { label: "Dashboard", parent: null, render: pageAdminDashboard },
       "admin/classes": { label: "Classes", parent: null, render: pageAdminClasses },
-      "admin/teachers": { label: "All Teachers", parent: "Teachers", render: pageAdminTeachersAll },
-      "admin/teachers/reset-password": { label: "Reset Password", parent: "Teachers", render: pageAdminTeachersResetPassword },
+      "admin/teachers": { label: "Teachers", parent: null, render: pageAdminTeachersAll },
       "admin/learners": { label: "Learners", parent: null, render: pageAdminLearners },
       "admin/reports": { label: "Reports", parent: null, render: pageAdminReports },
       "admin/settings": { label: "Settings", parent: null, render: pageAdminSettings },
@@ -692,8 +703,10 @@
           <label for="teacher-username">Username</label>
           <input type="text" id="teacher-username" autocomplete="off">
           ${passwordFieldHtml("teacher-password", "Password")}
-          <p class="muted">Forgotten your password? Contact your school administrator — they can set a new one for you.</p>
-          <div class="actions"><button type="button" class="primary" id="btn-teacher-login">Log in</button></div>
+          <div class="actions">
+            <button type="button" class="primary" id="btn-teacher-login">Log in</button>
+            <button type="button" class="secondary" id="btn-teacher-forgot-password">Forgot password?</button>
+          </div>
         </fieldset>`;
       wirePasswordToggles(area);
       const btn = document.getElementById("btn-teacher-login");
@@ -706,6 +719,9 @@
           clearMessage(); renderAll();
         } catch (e) { announce(e.message, true); }
       }));
+      document.getElementById("btn-teacher-forgot-password").addEventListener("click", () => {
+        announce("Passwords can't be recovered here for security reasons. Please contact your school administrator — they can set a new password for you from the Settings page.", false);
+      });
     }
 
     if (loginRole === "student") {
@@ -866,37 +882,6 @@
     });
   }
 
-  async function pageAdminTeachersResetPassword() {
-    let teachers;
-    try { teachers = await api("/admin/teachers"); } catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
-    pageEl.innerHTML = `
-      <h2>Reset a Teacher's Password</h2>
-      <fieldset>
-        <legend>Reset password</legend>
-        <p class="muted">Passwords can't be viewed for security reasons — only reset to something new.</p>
-        <label for="reset-pw-teacher-select">Teacher</label>
-        <select id="reset-pw-teacher-select">
-          <option value="">Select a teacher</option>
-          ${teachers.map((t) => `<option value="${escapeHtml(t.username)}">${escapeHtml(t.name)} (${escapeHtml(t.username)})</option>`).join("")}
-        </select>
-        ${passwordFieldHtml("reset-pw-new-password", "New password")}
-        <div class="actions"><button type="button" class="primary" id="btn-reset-teacher-password">Set new password</button></div>
-      </fieldset>
-    `;
-    wirePasswordToggles(pageEl);
-    document.getElementById("btn-reset-teacher-password").addEventListener("click", async () => {
-      const username = document.getElementById("reset-pw-teacher-select").value;
-      const newPassword = document.getElementById("reset-pw-new-password").value;
-      if (!username) { announce("Please choose a teacher first.", true); return; }
-      if (!newPassword) { announce("Please enter a new password.", true); return; }
-      try {
-        await api("/admin/teachers/" + encodeURIComponent(username) + "/password", { method: "PUT", body: JSON.stringify({ new_password: newPassword }) });
-        announce("Password reset. Let the teacher know their new password.", false);
-        document.getElementById("reset-pw-new-password").value = "";
-      } catch (e) { announce(e.message, true); }
-    });
-  }
-
   async function pageAdminLearners() {
     let classes, students;
     try { [classes, students] = await Promise.all([api("/admin/classes"), api("/admin/students")]); }
@@ -937,6 +922,10 @@
   }
 
   async function pageAdminReports() {
+    let classes;
+    try { classes = await api("/admin/classes"); } catch (e) { classes = []; }
+    const classOptions = classes.map((c) => `<option value="${escapeHtml(c.name)}">${escapeHtml(c.name)}</option>`).join("");
+
     pageEl.innerHTML = `
       <h2>Reports</h2>
       <fieldset>
@@ -945,6 +934,16 @@
         <input type="text" id="admin-view-regno" autocomplete="off">
         <div class="actions"><button type="button" class="secondary" id="btn-admin-view">Show results</button></div>
         <div id="admin-view-output"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Class ranking</legend>
+        <label for="admin-rank-class">Class</label>
+        <select id="admin-rank-class"><option value="">Select a class</option>${classOptions}</select>
+        <label for="admin-rank-term">Term (leave blank to rank by overall average across all terms)</label>
+        <input type="text" id="admin-rank-term" placeholder="e.g. Term 1 2026">
+        <div class="actions"><button type="button" class="secondary" id="btn-admin-view-ranking">View ranking</button></div>
+        <div id="admin-ranking-output"></div>
       </fieldset>
     `;
     document.getElementById("btn-admin-view").addEventListener("click", async () => {
@@ -956,9 +955,23 @@
         wireReportDownloadButtons(output);
       } catch (e) { output.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; }
     });
+    document.getElementById("btn-admin-view-ranking").addEventListener("click", async () => {
+      const className = document.getElementById("admin-rank-class").value;
+      const term = document.getElementById("admin-rank-term").value.trim();
+      const output = document.getElementById("admin-ranking-output");
+      if (!className) { announce("Please choose a class first.", true); return; }
+      try {
+        const query = term ? "?term=" + encodeURIComponent(term) : "";
+        const ranking = await api("/admin/classes/" + encodeURIComponent(className) + "/ranking" + query);
+        output.innerHTML = renderRankingTableHtml(ranking, className, term);
+      } catch (e) { output.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; }
+    });
   }
 
   async function pageAdminSettings() {
+    let teachers = [];
+    try { teachers = await api("/admin/teachers"); } catch (e) { /* fieldset below will just show none */ }
+
     pageEl.innerHTML = `
       <h2>Settings</h2>
       <fieldset>
@@ -966,8 +979,21 @@
         ${passwordFieldHtml("admin-new-password", "Change administrator password")}
         <div class="actions"><button type="button" class="secondary" id="btn-change-admin-password">Update password</button></div>
       </fieldset>
+
+      <fieldset>
+        <legend>Reset a teacher's password</legend>
+        <p class="muted">Passwords can't be viewed for security reasons — only reset to something new.</p>
+        <label for="reset-pw-teacher-select">Teacher</label>
+        <select id="reset-pw-teacher-select">
+          <option value="">Select a teacher</option>
+          ${teachers.map((t) => `<option value="${escapeHtml(t.username)}">${escapeHtml(t.name)} (${escapeHtml(t.username)})</option>`).join("")}
+        </select>
+        ${passwordFieldHtml("reset-pw-new-password", "New password")}
+        <div class="actions"><button type="button" class="primary" id="btn-reset-teacher-password">Set new password</button></div>
+      </fieldset>
     `;
     wirePasswordToggles(pageEl);
+
     document.getElementById("btn-change-admin-password").addEventListener("click", async () => {
       const newPw = document.getElementById("admin-new-password").value;
       if (!newPw) { announce("Please enter a new password.", true); return; }
@@ -975,6 +1001,18 @@
         await api("/admin/password", { method: "PUT", body: JSON.stringify({ new_password: newPw }) });
         announce("Administrator password updated.", false);
         document.getElementById("admin-new-password").value = "";
+      } catch (e) { announce(e.message, true); }
+    });
+
+    document.getElementById("btn-reset-teacher-password").addEventListener("click", async () => {
+      const username = document.getElementById("reset-pw-teacher-select").value;
+      const newPassword = document.getElementById("reset-pw-new-password").value;
+      if (!username) { announce("Please choose a teacher first.", true); return; }
+      if (!newPassword) { announce("Please enter a new password.", true); return; }
+      try {
+        await api("/admin/teachers/" + encodeURIComponent(username) + "/password", { method: "PUT", body: JSON.stringify({ new_password: newPassword }) });
+        announce("Password reset. Let the teacher know their new password.", false);
+        document.getElementById("reset-pw-new-password").value = "";
       } catch (e) { announce(e.message, true); }
     });
   }
@@ -1024,6 +1062,16 @@
         <div id="t-class-roster"></div>
         <div id="t-student-history"></div>
       </fieldset>
+
+      <fieldset>
+        <legend>Class ranking</legend>
+        <label for="t-rank-class">Class</label>
+        <select id="t-rank-class"><option value="">Select a class</option>${classOptions}</select>
+        <label for="t-rank-term">Term (leave blank to rank by overall average across all terms)</label>
+        <input type="text" id="t-rank-term" placeholder="e.g. Term 1 2026">
+        <div class="actions"><button type="button" class="secondary" id="btn-t-view-ranking">View ranking</button></div>
+        <div id="t-ranking-output"></div>
+      </fieldset>
     `;
 
     document.getElementById("btn-t-set-class").addEventListener("click", async () => {
@@ -1035,6 +1083,18 @@
         await api("/teacher/students", { method: "POST", body: JSON.stringify({ reg_no, name: name || null, class_name }) });
         announce("Saved.", false); pageTeacherClasses();
       } catch (e) { announce(e.message, true); }
+    });
+
+    document.getElementById("btn-t-view-ranking").addEventListener("click", async () => {
+      const className = document.getElementById("t-rank-class").value;
+      const term = document.getElementById("t-rank-term").value.trim();
+      const output = document.getElementById("t-ranking-output");
+      if (!className) { announce("Please choose a class first.", true); return; }
+      try {
+        const query = term ? "?term=" + encodeURIComponent(term) : "";
+        const ranking = await api("/teacher/classes/" + encodeURIComponent(className) + "/ranking" + query);
+        output.innerHTML = renderRankingTableHtml(ranking, className, term);
+      } catch (e) { output.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; }
     });
 
     const viewClassSelect = document.getElementById("t-view-class");
@@ -1262,9 +1322,22 @@
   async function pageStudentDashboard() {
     try {
       const student = await api("/student/me");
+      let rankingHtml = "";
+      try {
+        const ranking = await api("/student/me/class-ranking");
+        if (ranking.rank) {
+          rankingHtml = `<div class="stat-cards">
+            <div class="stat-card">
+              <div class="stat-value">${ranking.rank} of ${ranking.total_ranked}</div>
+              <div class="stat-label">Your Position in Class (Overall)</div>
+            </div>
+          </div>`;
+        }
+      } catch (e) { /* ranking is optional — skip silently if unavailable */ }
       pageEl.innerHTML = `
         <h2>Welcome, ${escapeHtml(student.name)}</h2>
         <p class="muted">Registration number: ${escapeHtml(student.reg_no)}. Class: ${escapeHtml(student.class_name || "")}.</p>
+        ${rankingHtml}
         ${resultHistoryBlockHtml(student, "/student/me/report-card")}
       `;
       wireReportDownloadButtons(pageEl);

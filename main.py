@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -69,6 +70,36 @@ def report_card_response(student: models.Student) -> Response:
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{student.reg_no}_report_card.pdf"'},
     )
+
+
+def compute_class_ranking(school_class: models.SchoolClass, term: Optional[str] = None) -> list[dict]:
+    """Ranks students in a class by average performance. If term is given,
+    ranks by that term's average (sum of subject totals for that term);
+    otherwise ranks by overall average across every recorded term.
+    Students with no matching results are left out of the ranking.
+    Ties share the same rank (standard competition ranking: 1, 2, 2, 4)."""
+    entries = []
+    for student in school_class.students:
+        results = student.results
+        if term:
+            results = [r for r in results if r.term == term]
+        if not results:
+            continue
+        subject_totals: dict = {}
+        for r in results:
+            subject_totals[r.subject] = subject_totals.get(r.subject, 0.0) + r.score
+        avg = sum(subject_totals.values()) / len(subject_totals)
+        entries.append({"reg_no": student.reg_no, "name": student.name, "average": avg})
+
+    entries.sort(key=lambda e: e["average"], reverse=True)
+    rank = 0
+    prev_avg = None
+    for i, e in enumerate(entries):
+        if e["average"] != prev_avg:
+            rank = i + 1
+            prev_avg = e["average"]
+        e["rank"] = rank
+    return entries
 
 
 # ---------------------------------------------------------------------
@@ -159,6 +190,19 @@ def admin_delete_class(
     db.delete(school_class)
     db.commit()
     return {"detail": "Class removed."}
+
+
+@app.get("/api/admin/classes/{class_name}/ranking")
+def admin_class_ranking(
+    class_name: str,
+    term: Optional[str] = None,
+    db: Session = Depends(get_db),
+    _=Depends(auth.require_role("admin")),
+):
+    school_class = db.query(models.SchoolClass).filter_by(name=class_name).first()
+    if not school_class:
+        raise HTTPException(status_code=404, detail="Class not found.")
+    return compute_class_ranking(school_class, term)
 
 
 @app.get("/api/admin/teachers", response_model=list[schemas.TeacherResponse])
@@ -440,6 +484,22 @@ def teacher_class_roster(
     ]
 
 
+@app.get("/api/teacher/classes/{class_name}/ranking")
+def teacher_class_ranking(
+    class_name: str,
+    term: Optional[str] = None,
+    db: Session = Depends(get_db),
+    token=Depends(auth.require_role("teacher")),
+):
+    teacher = get_teacher_or_403(db, token["sub"])
+    if class_name not in {c.name for c in teacher.classes}:
+        raise HTTPException(status_code=403, detail="You do not have access to that class.")
+    school_class = db.query(models.SchoolClass).filter_by(name=class_name).first()
+    if not school_class:
+        raise HTTPException(status_code=404, detail="Class not found.")
+    return compute_class_ranking(school_class, term)
+
+
 @app.post("/api/teacher/results")
 def teacher_add_result(
     payload: schemas.ResultCreateRequest,
@@ -585,6 +645,24 @@ def student_report_card(
     if not student:
         raise HTTPException(status_code=404, detail="Student record not found.")
     return report_card_response(student)
+
+
+@app.get("/api/student/me/class-ranking")
+def student_class_ranking(
+    term: Optional[str] = None,
+    db: Session = Depends(get_db),
+    token=Depends(auth.require_role("student")),
+):
+    student = db.query(models.Student).filter_by(reg_no=token["sub"]).first()
+    if not student or not student.school_class:
+        raise HTTPException(status_code=404, detail="No class is currently assigned to this learner.")
+    ranking = compute_class_ranking(student.school_class, term)
+    own = next((e for e in ranking if e["reg_no"] == student.reg_no), None)
+    if not own:
+        return {"rank": None, "total_ranked": len(ranking), "average": None}
+    # Only the learner's own position is returned, not classmates' names or
+    # scores, to keep other students' results private.
+    return {"rank": own["rank"], "total_ranked": len(ranking), "average": own["average"]}
 
 
 # ---------------------------------------------------------------------
