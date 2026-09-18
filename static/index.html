@@ -358,6 +358,41 @@
     });
   }
 
+  function subjectFieldHtml(idPrefix, subjects, currentValue) {
+    const isKnown = subjects.some((s) => s.name === currentValue);
+    const options = subjects.map((s) =>
+      `<option value="${escapeHtml(s.name)}" ${s.name === currentValue ? "selected" : ""}>${escapeHtml(s.name)}</option>`
+    ).join("");
+    return `
+      <label for="${idPrefix}-subject-select">Subject</label>
+      <select id="${idPrefix}-subject-select">
+        <option value="">Select a subject</option>
+        ${options}
+        <option value="__other__" ${currentValue && !isKnown ? "selected" : ""}>Other (type manually)</option>
+      </select>
+      <div id="${idPrefix}-subject-other-wrap" style="${currentValue && !isKnown ? "" : "display:none;"} margin-top:0.5rem;">
+        <label for="${idPrefix}-subject-other">Type the subject name</label>
+        <input type="text" id="${idPrefix}-subject-other" value="${currentValue && !isKnown ? escapeHtml(currentValue) : ""}">
+      </div>`;
+  }
+  function wireSubjectField(idPrefix) {
+    const select = document.getElementById(idPrefix + "-subject-select");
+    const otherWrap = document.getElementById(idPrefix + "-subject-other-wrap");
+    select.addEventListener("change", () => {
+      otherWrap.style.display = select.value === "__other__" ? "" : "none";
+    });
+  }
+  function readSubjectField(idPrefix) {
+    const select = document.getElementById(idPrefix + "-subject-select");
+    if (select.value === "__other__") return document.getElementById(idPrefix + "-subject-other").value.trim();
+    return select.value;
+  }
+  function resetSubjectField(idPrefix) {
+    document.getElementById(idPrefix + "-subject-select").value = "";
+    document.getElementById(idPrefix + "-subject-other-wrap").style.display = "none";
+    document.getElementById(idPrefix + "-subject-other").value = "";
+  }
+
   async function withLoadingButton(button, loadingText, fn) {
     const original = button.textContent;
     button.disabled = true;
@@ -423,22 +458,26 @@
     termOrder.forEach((term) => {
       const t = termMap[term];
       const subjectTotals = [];
-      let subjectBlocks = "";
-      t.subjectOrder.forEach((subject) => {
+      const rows = t.subjectOrder.map((subject) => {
         const s = t.subjects[subject];
         subjectTotals.push(s.total); allSubjectTotals.push(s.total);
-        const componentLines = s.components.length > 1
-          ? "<ul>" + s.components.map((c) => `<li>${c.comment ? escapeHtml(c.comment) : "Entry"}: ${c.score}%</li>`).join("") + "</ul>"
-          : (s.components[0].comment ? `<p class="muted">${escapeHtml(s.components[0].comment)}</p>` : "");
-        subjectBlocks += `<div style="margin-top:0.7rem;">
-          <strong>${escapeHtml(subject)}: ${s.total}% — ${cbeFull(s.total)}</strong>
-          ${componentLines}
-        </div>`;
-      });
+        const breakdown = s.components.length > 1
+          ? s.components.map((c) => `${c.comment ? escapeHtml(c.comment) : "Entry"}: ${c.score}%`).join("; ")
+          : (s.components[0].comment ? escapeHtml(s.components[0].comment) : "—");
+        return `<tr>
+          <td>${escapeHtml(subject)}</td>
+          <td>${s.total}%</td>
+          <td>${escapeHtml(cbeFull(s.total))}</td>
+          <td class="muted">${breakdown}</td>
+        </tr>`;
+      }).join("");
       const termAvg = average(subjectTotals);
       html += `<div class="term-block">
         <h3>${escapeHtml(term)}</h3>
-        ${subjectBlocks}
+        <table><caption>Results for ${escapeHtml(term)}</caption>
+          <tr><th scope="col">Subject</th><th scope="col">Score</th><th scope="col">Level</th><th scope="col">Breakdown</th></tr>
+          ${rows}
+        </table>
         <p style="margin-top:0.8rem;"><strong>Term average: ${termAvg.toFixed(1)}% — ${cbeFull(termAvg)}</strong></p>
       </div>`;
     });
@@ -489,6 +528,7 @@
     admin: [
       { id: "dashboard", label: "Dashboard", path: "admin/dashboard" },
       { id: "classes", label: "Classes", path: "admin/classes" },
+      { id: "subjects", label: "Subjects", path: "admin/subjects" },
       { id: "teachers", label: "Teachers", path: "admin/teachers" },
       { id: "learners", label: "Learners", path: "admin/learners" },
       { id: "reports", label: "Reports", path: "admin/reports" },
@@ -513,6 +553,7 @@
     admin: {
       "admin/dashboard": { label: "Dashboard", parent: null, render: pageAdminDashboard },
       "admin/classes": { label: "Classes", parent: null, render: pageAdminClasses },
+      "admin/subjects": { label: "Subjects", parent: null, render: pageAdminSubjects },
       "admin/teachers": { label: "Teachers", parent: null, render: pageAdminTeachersAll },
       "admin/learners": { label: "Learners", parent: null, render: pageAdminLearners },
       "admin/reports": { label: "Reports", parent: null, render: pageAdminReports },
@@ -800,6 +841,38 @@
       btn.addEventListener("click", async () => {
         if (!window.confirm("Remove the class \"" + btn.dataset.removeClass + "\"? Students already in it keep the label until reassigned.")) return;
         try { await api("/admin/classes/" + encodeURIComponent(btn.dataset.removeClass), { method: "DELETE" }); announce("Class removed.", false); pageAdminClasses(); }
+        catch (e) { announce(e.message, true); }
+      });
+    });
+  }
+
+  async function pageAdminSubjects() {
+    let subjects;
+    try { subjects = await api("/admin/subjects"); } catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
+    const subjectListHtml = subjects.length
+      ? "<ul>" + subjects.map((s) => `<li>${escapeHtml(s.name)} <button type="button" class="small secondary" data-remove-subject="${escapeHtml(s.name)}">Remove</button></li>`).join("") + "</ul>"
+      : "<p class='muted'>No subjects yet. Add one below.</p>";
+    pageEl.innerHTML = `
+      <h2>Subjects</h2>
+      <fieldset>
+        <legend>Subjects</legend>
+        <p class="muted">Subjects added here appear as a dropdown for teachers when they record marks, instead of typing the subject name each time.</p>
+        ${subjectListHtml}
+        <label for="new-subject-name">Add a new subject</label>
+        <input type="text" id="new-subject-name" placeholder="e.g. Mathematics">
+        <div class="actions"><button type="button" class="primary" id="btn-add-subject">Add subject</button></div>
+      </fieldset>
+    `;
+    document.getElementById("btn-add-subject").addEventListener("click", async () => {
+      const name = document.getElementById("new-subject-name").value.trim();
+      if (!name) { announce("Please enter a subject name.", true); return; }
+      try { await api("/admin/subjects", { method: "POST", body: JSON.stringify({ name }) }); announce("Subject \"" + name + "\" added.", false); pageAdminSubjects(); }
+      catch (e) { announce(e.message, true); }
+    });
+    pageEl.querySelectorAll("[data-remove-subject]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (!window.confirm("Remove the subject \"" + btn.dataset.removeSubject + "\"? Results already recorded under it are unaffected.")) return;
+        try { await api("/admin/subjects/" + encodeURIComponent(btn.dataset.removeSubject), { method: "DELETE" }); announce("Subject removed.", false); pageAdminSubjects(); }
         catch (e) { announce(e.message, true); }
       });
     });
@@ -1143,8 +1216,9 @@
   }
 
   async function pageTeacherMarksEnter() {
-    let me;
-    try { me = await api("/teacher/me"); } catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
+    let me, subjects;
+    try { [me, subjects] = await Promise.all([api("/teacher/me"), api("/public/subjects")]); }
+    catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
     const classOptions = me.classes.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
 
     pageEl.innerHTML = `
@@ -1157,8 +1231,8 @@
         <select id="t-grade-student"><option value="">Select a class first</option></select>
         <label for="t-grade-term">Term or period (e.g. Term 1 2026)</label>
         <input type="text" id="t-grade-term">
-        <label for="t-grade-subject">Subject</label>
-        <input type="text" id="t-grade-subject">
+        ${subjectFieldHtml("t-grade", subjects, null)}
+        ${!subjects.length ? "<p class='muted'>No subjects have been added yet — ask an administrator to add some under Subjects, or use \"Other\" for now.</p>" : ""}
         ${scoreEntryFieldsHtml("t-grade", "level")}
         <label for="t-grade-comment">Comment / rubric note (optional) — e.g. "CAT 1", "Group work", or feedback on what the level was based on</label>
         <textarea id="t-grade-comment"></textarea>
@@ -1167,6 +1241,7 @@
       </fieldset>
     `;
     wireScoreEntryToggle(pageEl, "t-grade");
+    wireSubjectField("t-grade");
 
     const gradeClassSelect = document.getElementById("t-grade-class");
     const gradeStudentSelect = document.getElementById("t-grade-student");
@@ -1184,26 +1259,27 @@
     document.getElementById("btn-t-add-grade").addEventListener("click", async () => {
       const reg_no = gradeStudentSelect.value;
       const term = document.getElementById("t-grade-term").value.trim();
-      const subject = document.getElementById("t-grade-subject").value.trim();
+      const subject = readSubjectField("t-grade");
       const comment = document.getElementById("t-grade-comment").value.trim();
       const entry = readScoreEntry(pageEl, "t-grade");
       if (!reg_no) { announce("Please choose a class and a learner.", true); return; }
       if (!term) { announce("Please enter a term or period.", true); return; }
-      if (!subject) { announce("Please enter a subject.", true); return; }
+      if (!subject) { announce("Please select or enter a subject.", true); return; }
       if (!entry.valid) { announce("Please enter a valid score between 0 and 100.", true); return; }
       try {
         await api("/teacher/results", { method: "POST", body: JSON.stringify({ reg_no, term, subject, score: entry.score, comment: comment || null }) });
         announce("Result recorded.", false);
         document.getElementById("t-grade-term").value = "";
-        document.getElementById("t-grade-subject").value = "";
+        resetSubjectField("t-grade");
         document.getElementById("t-grade-comment").value = "";
       } catch (e) { announce(e.message, true); }
     });
   }
 
   async function pageTeacherMarksEdit() {
-    let me;
-    try { me = await api("/teacher/me"); } catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
+    let me, subjects;
+    try { [me, subjects] = await Promise.all([api("/teacher/me"), api("/public/subjects")]); }
+    catch (e) { pageEl.innerHTML = "<p class='muted'>" + escapeHtml(e.message) + "</p>"; return; }
     const classOptions = me.classes.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
 
     pageEl.innerHTML = `
@@ -1238,12 +1314,12 @@
       if (!reg_no) { announce("Please choose a class and a learner.", true); return; }
       try {
         const student = await api("/teacher/students/" + encodeURIComponent(reg_no) + "/results");
-        renderEditableResultsList(listEl, student);
+        renderEditableResultsList(listEl, student, subjects);
       } catch (e) { announce(e.message, true); }
     });
   }
 
-  function renderEditableResultsList(container, student) {
+  function renderEditableResultsList(container, student, subjects) {
     if (!student.results.length) {
       container.innerHTML = "<p class='muted'>No results recorded for " + escapeHtml(student.name) + " yet.</p>";
       return;
@@ -1268,7 +1344,7 @@
           await api("/teacher/results/" + btn.dataset.deleteResult, { method: "DELETE" });
           announce("Result deleted.", false);
           const updated = await api("/teacher/students/" + encodeURIComponent(student.reg_no) + "/results");
-          renderEditableResultsList(container, updated);
+          renderEditableResultsList(container, updated, subjects);
         } catch (e) { announce(e.message, true); }
       });
     });
@@ -1283,8 +1359,7 @@
         row.querySelector(".view-mode").innerHTML = `
           <label>Term or period</label>
           <input type="text" class="edit-term" value="${escapeHtml(r.term)}">
-          <label>Subject</label>
-          <input type="text" class="edit-subject" value="${escapeHtml(r.subject)}">
+          ${subjectFieldHtml(idPrefix, subjects, r.subject)}
           ${scoreEntryFieldsHtml(idPrefix, defaultMode)}
           <label>Comment / rubric note</label>
           <textarea class="edit-comment">${escapeHtml(r.comment || "")}</textarea>
@@ -1296,10 +1371,11 @@
         if (defaultMode === "level") document.getElementById(idPrefix + "-level").value = levelForScore(r.score);
         else document.getElementById(idPrefix + "-score").value = r.score;
         wireScoreEntryToggle(row, idPrefix);
+        wireSubjectField(idPrefix);
 
         row.querySelector("[data-save-result]").addEventListener("click", async () => {
           const term = row.querySelector(".edit-term").value.trim();
-          const subject = row.querySelector(".edit-subject").value.trim();
+          const subject = readSubjectField(idPrefix);
           const comment = row.querySelector(".edit-comment").value.trim();
           const entry = readScoreEntry(row, idPrefix);
           if (!term || !subject || !entry.valid) { announce("Please fill in a valid term, subject, and score between 0 and 100.", true); return; }
@@ -1307,10 +1383,10 @@
             await api("/teacher/results/" + resultId, { method: "PUT", body: JSON.stringify({ term, subject, score: entry.score, comment: comment || null }) });
             announce("Result updated.", false);
             const updated = await api("/teacher/students/" + encodeURIComponent(student.reg_no) + "/results");
-            renderEditableResultsList(container, updated);
+            renderEditableResultsList(container, updated, subjects);
           } catch (e) { announce(e.message, true); }
         });
-        row.querySelector("[data-cancel-edit]").addEventListener("click", () => renderEditableResultsList(container, student));
+        row.querySelector("[data-cancel-edit]").addEventListener("click", () => renderEditableResultsList(container, student, subjects));
       });
     });
   }

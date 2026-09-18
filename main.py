@@ -112,6 +112,12 @@ def list_classes_public(db: Session = Depends(get_db)):
     return [schemas.ClassResponse(name=c.name) for c in classes]
 
 
+@app.get("/api/public/subjects", response_model=list[schemas.SubjectResponse])
+def list_subjects_public(db: Session = Depends(get_db)):
+    subjects = db.query(models.Subject).order_by(models.Subject.name).all()
+    return [schemas.SubjectResponse(name=s.name) for s in subjects]
+
+
 # ---------------------------------------------------------------------
 # Auth endpoints
 # ---------------------------------------------------------------------
@@ -190,6 +196,43 @@ def admin_delete_class(
     db.delete(school_class)
     db.commit()
     return {"detail": "Class removed."}
+
+
+@app.get("/api/admin/subjects", response_model=list[schemas.SubjectResponse])
+def admin_list_subjects(
+    db: Session = Depends(get_db), _=Depends(auth.require_role("admin"))
+):
+    subjects = db.query(models.Subject).order_by(models.Subject.name).all()
+    return [schemas.SubjectResponse(name=s.name) for s in subjects]
+
+
+@app.post("/api/admin/subjects", response_model=schemas.SubjectResponse)
+def admin_add_subject(
+    payload: schemas.SubjectCreateRequest,
+    db: Session = Depends(get_db),
+    _=Depends(auth.require_role("admin")),
+):
+    existing = db.query(models.Subject).filter_by(name=payload.name).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="That subject already exists.")
+    subject = models.Subject(name=payload.name)
+    db.add(subject)
+    db.commit()
+    return schemas.SubjectResponse(name=subject.name)
+
+
+@app.delete("/api/admin/subjects/{subject_name}")
+def admin_delete_subject(
+    subject_name: str,
+    db: Session = Depends(get_db),
+    _=Depends(auth.require_role("admin")),
+):
+    subject = db.query(models.Subject).filter_by(name=subject_name).first()
+    if not subject:
+        raise HTTPException(status_code=404, detail="Subject not found.")
+    db.delete(subject)
+    db.commit()
+    return {"detail": "Subject removed."}
 
 
 @app.get("/api/admin/classes/{class_name}/ranking")

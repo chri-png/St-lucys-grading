@@ -11,11 +11,44 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import cm
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.graphics.shapes import Drawing, String
+from reportlab.graphics.charts.barcharts import VerticalBarChart
 
 SCHOOL_NAME = "St. Lucy's School for the Blind"
 ACCENT_COLOR = colors.HexColor("#1d4d3f")
 ACCENT_LIGHT = colors.HexColor("#e8f0ec")
 BORDER_COLOR = colors.HexColor("#b8b2a4")
+CHART_WIDTH = 420
+CHART_HEIGHT = 170
+
+
+def make_bar_chart(categories, values, title):
+    """Builds a simple labeled vertical bar chart (0-100 scale) as a
+    reportlab Drawing, for embedding directly into the PDF story."""
+    drawing = Drawing(CHART_WIDTH, CHART_HEIGHT)
+    drawing.add(String(CHART_WIDTH / 2, CHART_HEIGHT - 12, title, textAnchor="middle",
+                        fontSize=10, fillColor=ACCENT_COLOR))
+
+    chart = VerticalBarChart()
+    chart.x = 45
+    chart.y = 35
+    chart.width = CHART_WIDTH - 70
+    chart.height = CHART_HEIGHT - 60
+    chart.data = [values]
+    chart.categoryAxis.categoryNames = [
+        (c if len(c) <= 14 else c[:13] + "…") for c in categories
+    ]
+    chart.categoryAxis.labels.fontSize = 7.5
+    chart.categoryAxis.labels.angle = 25 if len(categories) > 4 else 0
+    chart.categoryAxis.labels.dy = -10 if len(categories) > 4 else -3
+    chart.valueAxis.valueMin = 0
+    chart.valueAxis.valueMax = 100
+    chart.valueAxis.valueStep = 20
+    chart.valueAxis.labels.fontSize = 7.5
+    chart.bars[0].fillColor = ACCENT_COLOR
+    chart.barWidth = 10
+    drawing.add(chart)
+    return drawing
 
 
 def cbe_full(score: float) -> str:
@@ -82,14 +115,17 @@ def build_report_card_pdf(student) -> bytes:
     else:
         term_map, term_order = aggregate_by_term_subject(results)
         all_subject_totals = []
+        term_averages = []
 
         for term in term_order:
             elements.append(Paragraph(term, term_heading_style))
             data = [["Subject", "Score", "Level"]]
             subject_totals = []
+            subject_names = []
             for subject, info in term_map[term].items():
                 total = info["total"]
                 subject_totals.append(total)
+                subject_names.append(subject)
                 all_subject_totals.append(total)
                 data.append([subject, f"{total:.0f}%", cbe_full(total)])
 
@@ -105,12 +141,23 @@ def build_report_card_pdf(student) -> bytes:
             elements.append(table)
 
             term_avg = sum(subject_totals) / len(subject_totals) if subject_totals else 0
+            term_averages.append(term_avg)
             elements.append(Spacer(1, 0.15 * cm))
             elements.append(Paragraph(
                 f"<b>Term average: {term_avg:.1f}% — {cbe_full(term_avg)}</b>", summary_style
             ))
 
+            if len(subject_names) >= 1:
+                elements.append(Spacer(1, 0.2 * cm))
+                elements.append(make_bar_chart(subject_names, subject_totals, f"{term} — Subject Performance"))
+
         overall_avg = sum(all_subject_totals) / len(all_subject_totals) if all_subject_totals else 0
+
+        if len(term_order) >= 2:
+            elements.append(Paragraph("Performance Trend", term_heading_style))
+            elements.append(make_bar_chart(term_order, term_averages, "Term Average Over Time"))
+            elements.append(Spacer(1, 0.2 * cm))
+
         elements.append(Paragraph(
             f"Overall average: {overall_avg:.1f}% — {cbe_full(overall_avg)}", overall_style
         ))

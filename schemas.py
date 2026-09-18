@@ -33,6 +33,15 @@ class ClassResponse(BaseModel):
     name: str
 
 
+# ---- Subjects ----
+class SubjectCreateRequest(BaseModel):
+    name: str = Field(min_length=1)
+
+
+class SubjectResponse(BaseModel):
+    name: str
+
+
 # ---- Teachers ----
 class TeacherCreateRequest(BaseModel):
     name: str
